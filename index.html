@@ -1,0 +1,235 @@
+import React, { useState } from 'react';
+
+const TeraboxExtractor = () => {
+  const [url, setUrl] = useState('');
+  const [fileInfo, setFileInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [debugMode, setDebugMode] = useState(false);
+
+  const extractTeraboxUrl = (inputUrl) => {
+    // Extract URL from any wrapper URL for multiple possible domains
+    const domainPatterns = [
+      'teraboxapp\\.com',
+      'terabox\\.com',
+      '1024tera\\.com',
+      'terabox\\.app',
+      'teraboxpro\\.com',
+      'teraboxpro\\.app',
+      'nephobox\\.com',
+      'nephocloud\\.com',
+      '4funbox\\.com',
+      'teraboxapp\\.cc',
+      'dubox\\.com',
+      'botsapp\\.me',
+      'boteapp\\.me',
+      'ufile\\.io',
+      'mirrorcreator\\.com',
+      'mirrorace\\.com',
+      'mirrorace\\.org'
+    ];
+    
+    const regex = new RegExp(`(https?:\\/\\/(?:www\\.)?(?:${domainPatterns.join('|')})\\/s\\/[a-zA-Z0-9_\\-\\.]+)`, 'i');
+    const match = inputUrl.match(regex);
+    return match ? match[1] : inputUrl;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!url.trim()) {
+      setError('Please enter a valid URL');
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    setFileInfo(null);
+    
+    try {
+      // Extract the URL from any wrapper
+      const extractedUrl = extractTeraboxUrl(url);
+      console.log("Extracted URL:", extractedUrl);
+      
+      // Basic validation for URL format
+      if (extractedUrl === url && !url.match(/https?:\/\/(www\.)?[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+\/s\//i)) {
+        throw new Error('The URL format is not recognized. Please enter a supported sharing URL.');
+      }
+      
+      // Construct API URL - use direct URL for now
+      const apiUrl = `https://terabox-test-api.wd-zone.workers.dev/?url=${encodeURIComponent(extractedUrl)}`;
+      console.log("API URL:", apiUrl);
+      
+      // Implement a timeout for the fetch request
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
+      
+      try {
+        // Make the API request
+        const response = await fetch(apiUrl, {
+          signal: controller.signal,
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        clearTimeout(timeoutId);
+        
+        console.log("Response status:", response.status);
+        
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status} - ${response.statusText}`);
+        }
+        
+        // Parse the response
+        const data = await response.json();
+        console.log("API response:", data);
+        
+        // Handle API error responses
+        if (data.error) {
+          throw new Error(`API error: ${data.error}`);
+        }
+        
+        // Create a fake response for testing if needed
+        // const data = {
+        //   filename: "Test File.mp4",
+        //   size: 1024 * 1024 * 100, // 100 MB
+        //   downloadLink: "https://example.com/download/test-file.mp4"
+        // };
+        
+        // Validate the response data
+        if (!data || typeof data !== 'object') {
+          throw new Error('Invalid response format from API');
+        }
+        
+        if (!data.filename && !data.size && !data.downloadLink) {
+          throw new Error('No file information could be extracted from this URL. The API may be down or the URL may not be supported.');
+        }
+        
+        // Set the file info
+        setFileInfo(data);
+      } catch (fetchError) {
+        if (fetchError.name === 'AbortError') {
+          throw new Error('Request timed out. The API service may be unavailable.');
+        } else {
+          throw fetchError;
+        }
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setError(err.message || 'Failed to extract file information');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return 'Unknown';
+    
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let size = bytes;
+    let unitIndex = 0;
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    return `${size.toFixed(2)} ${units[unitIndex]}`;
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 bg-gray-50 min-h-screen">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold text-blue-600 mb-2">File Link Extractor</h1>
+        <p className="text-gray-600">Enter a Terabox or compatible URL to extract file information</p>
+        <div className="mt-2 text-sm text-gray-500">
+          Supported domains: teraboxapp.com, terabox.com, 1024tera.com, terabox.app, teraboxpro.com, 
+          nephobox.com, 4funbox.com, dubox.com, and more
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="mb-8">
+        <div className="flex flex-col md:flex-row gap-2">
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Enter URL (e.g., https://teraboxapp.com/s/... or any supported domain)"
+            className="flex-grow p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white py-3 px-6 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            disabled={loading}
+          >
+            {loading ? 'Processing...' : 'Extract Info'}
+          </button>
+        </div>
+      </form>
+
+      {error && (
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded-md">
+          <p>{error}</p>
+          <button 
+            className="text-blue-600 text-sm mt-2 underline"
+            onClick={() => setDebugMode(!debugMode)}
+          >
+            {debugMode ? "Hide Debug Info" : "Show Debug Info"}
+          </button>
+          
+          {debugMode && (
+            <div className="mt-3 p-3 bg-gray-800 text-white rounded text-xs overflow-x-auto">
+              <p>API URL: {`https://terabox-test-api.wd-zone.workers.dev/?url=${encodeURIComponent(extractTeraboxUrl(url))}`}</p>
+              <p className="mt-2">Try opening this URL directly in your browser to test the API.</p>
+              <p className="mt-2">Extracted URL: {extractTeraboxUrl(url)}</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {fileInfo && (
+        <div className="bg-white p-6 rounded-md shadow-md">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">File Information</h2>
+          
+          <div className="space-y-4">
+            <div className="border-b pb-3">
+              <h3 className="text-sm font-medium text-gray-500">Filename</h3>
+              <p className="mt-1 text-lg">{fileInfo.filename || 'Unknown'}</p>
+            </div>
+            
+            <div className="border-b pb-3">
+              <h3 className="text-sm font-medium text-gray-500">File Size</h3>
+              <p className="mt-1 text-lg">{formatFileSize(fileInfo.size)}</p>
+            </div>
+            
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Download Link</h3>
+              {fileInfo.downloadLink ? (
+                <div className="mt-2">
+                  <a
+                    href={fileInfo.downloadLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block bg-green-600 text-white py-2 px-4 rounded-md font-medium hover:bg-green-700"
+                  >
+                    Download File
+                  </a>
+                  <div className="mt-3 p-2 bg-gray-100 rounded-md text-sm text-gray-800 break-all">
+                    {fileInfo.downloadLink}
+                  </div>
+                </div>
+              ) : (
+                <p className="mt-1 text-red-600">No download link available</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default TeraboxExtractor;
