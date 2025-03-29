@@ -85,6 +85,31 @@
                     <p id="filesize" class="mt-1 text-lg">Unknown</p>
                 </div>
                 
+                <div class="border-b pb-3">
+                    <h3 class="text-sm font-medium text-gray-500">Category</h3>
+                    <p id="category" class="mt-1 text-lg">Unknown</p>
+                </div>
+                
+                <div class="border-b pb-3">
+                    <h3 class="text-sm font-medium text-gray-500">Created On</h3>
+                    <p id="createTime" class="mt-1 text-lg">Unknown</p>
+                </div>
+                
+                <div class="border-b pb-3">
+                    <h3 class="text-sm font-medium text-gray-500">Developer</h3>
+                    <p id="dev" class="mt-1 text-lg">Unknown</p>
+                </div>
+                
+                <div class="border-b pb-3">
+                    <h3 class="text-sm font-medium text-gray-500">Created By</h3>
+                    <p id="createdBy" class="mt-1 text-lg">Unknown</p>
+                </div>
+                
+                <div class="border-b pb-3">
+                    <h3 class="text-sm font-medium text-gray-500">Telegram Channel</h3>
+                    <p id="telegramChannel" class="mt-1 text-lg">Unknown</p>
+                </div>
+                
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Download Link</h3>
                     <div id="downloadLinkContainer" class="mt-2">
@@ -104,6 +129,16 @@
                 </div>
             </div>
         </div>
+        
+        <!-- Test Data Button (for development) -->
+        <div class="mt-6 text-center">
+            <button 
+                id="testDataButton" 
+                class="text-sm text-gray-500 underline"
+            >
+                Load Test Data
+            </button>
+        </div>
     </div>
 
     <script>
@@ -121,12 +156,32 @@
             const fileInfoContainer = document.getElementById('fileInfoContainer');
             const filename = document.getElementById('filename');
             const filesize = document.getElementById('filesize');
+            const category = document.getElementById('category');
+            const createTime = document.getElementById('createTime');
+            const dev = document.getElementById('dev');
+            const createdBy = document.getElementById('createdBy');
+            const telegramChannel = document.getElementById('telegramChannel');
             const downloadLinkContainer = document.getElementById('downloadLinkContainer');
             const downloadButton = document.getElementById('downloadButton');
             const downloadLinkText = document.getElementById('downloadLinkText');
             const noLinkMessage = document.getElementById('noLinkMessage');
+            const testDataButton = document.getElementById('testDataButton');
 
             let debugMode = false;
+            
+            // Sample test data
+            const testData = {
+                "ok": true,
+                "message": "✅ Your file has been successfully retrieved!",
+                "filename": "📂 5_6329906926645675697(2)(2)(2).mp4",
+                "size": "📏 4.19 MB",
+                "category": "📌 1",
+                "create_time": "⏳ 2022-11-21T11:41:35.000Z",
+                "downloadLink": "🔗 https://d-jp02-zen.terabox.com/file/0bfa099a4cb572b3ec316f221b5789cb?bkt=en-82d2bca2fdceac3feb25f206740326aa1e818b98e6b2b1babfbb08220f9238c47c9cac8e0a7ca705&xcode=a1a716af2d4dbbe994530180d9d37f0088ad701f5967be7095bf41bba0041b2d3b3f4a1a0d16bad10fca93440000a4aaaa68de184fb12011&fid=4401934006824-250528-234086870370988&time=1743251311&sign=FDTAXUGERLQlBHSKfWon-DCb740ccc5511e5e8fedcff06b081203-kCV3oN0p%2BOWUaPFgm5NlerKUHI4%3D&to=149&size=4392762&sta_dx=4392762&sta_cs=4&sta_ft=mp4&sta_ct=7&sta_mt=5&fm2=MH%2Ctky%2CAnywhere%2C%2C%2Cany&region=tky&ctime=1669030895&mtime=1731563187&resv0=-1&resv1=0&resv2=rlim&resv3=5&resv4=4392762&vuk=4401514344005&iv=0&htype=&randtype=&newver=1&newfm=1&secfm=1&flow_ver=3&pkey=en-972444be7837798486b86325ede217a53ab3e8bb091f801d080c171ff67649c62e604fbeebef5e9d&sl=68091977&expires=1743280111&rt=sh&r=606813729&sh=1&vbdid=-&fin=5_6329906926645675697%282%29%282%29%282%29.mp4&rtype=1&dp-logid=8955091340874991846&dp-callid=0.1&hps=1&tsl=2000&csl=2000&fsl=-1&csign=%2Fg7F1AmTtnWd27Rco4go6dDvbdg%3D&so=0&ut=6&uter=0&serv=1&uc=0&ti=14a3010384c1ca3cd0a29c27c94823964250f09f16bb4430305a5e1275657320&tuse=&raw_appid=0&ogr=0&rregion=XVVi&adg=&reqlabel=250528_f_74d3bd57ea002b4817a6e5b1a6af322a_-1_4517a319922acc893604848f6a741e71&ccn=SG&by=themis",
+                "Dev": "❣️ Farooq_is_king.t.me",
+                "Created_by": "🛠 𝐖𝐎𝐎𝐃𝐜𝐫𝐚𝐟𝐭",
+                "Telegram_Channel": "📢 Opleech_WD.t.me"
+            };
 
             // Function to extract URL
             function extractTeraboxUrl(inputUrl) {
@@ -156,9 +211,19 @@
                 return match ? match[1] : inputUrl;
             }
 
-            // Function to format file size
-            function formatFileSize(bytes) {
-                if (!bytes) return 'Unknown';
+            // Function to format file size (if not already formatted)
+            function formatFileSize(sizeStr) {
+                if (!sizeStr) return 'Unknown';
+                
+                // If size is already a formatted string (starts with an emoji or contains units)
+                if (typeof sizeStr === 'string' && (sizeStr.trim().startsWith('📏') || 
+                    sizeStr.includes(' KB') || sizeStr.includes(' MB') || sizeStr.includes(' GB'))) {
+                    return sizeStr;
+                }
+                
+                // Otherwise parse as number and format
+                const bytes = parseFloat(sizeStr);
+                if (isNaN(bytes)) return sizeStr || 'Unknown';
                 
                 const units = ['B', 'KB', 'MB', 'GB', 'TB'];
                 let size = bytes;
@@ -172,11 +237,34 @@
                 return `${size.toFixed(2)} ${units[unitIndex]}`;
             }
 
+            // Function to format date
+            function formatDate(dateStr) {
+                if (!dateStr) return 'Unknown';
+                
+                // Remove emoji if present
+                if (dateStr.startsWith('⏳')) {
+                    dateStr = dateStr.substring(dateStr.indexOf(' ') + 1);
+                }
+                
+                try {
+                    const date = new Date(dateStr);
+                    return date.toLocaleString();
+                } catch (e) {
+                    return dateStr;
+                }
+            }
+
             // Toggle debug info
             debugButton.addEventListener('click', function() {
                 debugMode = !debugMode;
                 debugInfo.classList.toggle('hidden');
                 debugButton.textContent = debugMode ? 'Hide Debug Info' : 'Show Debug Info';
+            });
+
+            // Test data button
+            testDataButton.addEventListener('click', function() {
+                hideError();
+                showFileInfo(testData);
             });
 
             // Handle form submission
@@ -296,12 +384,24 @@
 
             // Show file information
             function showFileInfo(data) {
+                // Set all the fields with data
                 filename.textContent = data.filename || 'Unknown';
-                filesize.textContent = formatFileSize(data.size);
+                filesize.textContent = data.size || formatFileSize(data.size);
+                category.textContent = data.category || 'Unknown';
+                createTime.textContent = formatDate(data.create_time);
+                dev.textContent = data.Dev || 'Unknown';
+                createdBy.textContent = data.Created_by || 'Unknown';
+                telegramChannel.textContent = data.Telegram_Channel || 'Unknown';
                 
                 if (data.downloadLink) {
-                    downloadButton.href = data.downloadLink;
-                    downloadLinkText.textContent = data.downloadLink;
+                    // Remove the emoji prefix if present
+                    let cleanLink = data.downloadLink;
+                    if (cleanLink.startsWith('🔗')) {
+                        cleanLink = cleanLink.substring(cleanLink.indexOf(' ') + 1);
+                    }
+                    
+                    downloadButton.href = cleanLink;
+                    downloadLinkText.textContent = cleanLink;
                     downloadLinkContainer.classList.remove('hidden');
                     noLinkMessage.classList.add('hidden');
                 } else {
