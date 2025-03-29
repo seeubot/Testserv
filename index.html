@@ -183,7 +183,7 @@
                 "Telegram_Channel": "📢 Opleech_WD.t.me"
             };
 
-            // Function to extract URL
+            // Function to extract URL - FIXED REGEX PATTERN
             function extractTeraboxUrl(inputUrl) {
                 const domainPatterns = [
                     'teraboxapp\\.com',
@@ -206,9 +206,21 @@
                     'terafileshare\\.com'
                 ];
                 
-                const regex = new RegExp(`(https?:\\/\\/(?:www\\.)?(?:${domainPatterns.join('|')})\\/s\\/[a-zA-Z0-9_\\-\\.]+)`, 'i');
+                // Improved regex pattern to match URLs more reliably
+                const patternString = `(https?:\\/\\/(?:www\\.)?(?:${domainPatterns.join('|')})\\/s\\/[a-zA-Z0-9_\\-\\.~%]+(?:\\?[^\\s]*)?)`; 
+                const regex = new RegExp(patternString, 'i');
                 const match = inputUrl.match(regex);
-                return match ? match[1] : inputUrl;
+                
+                if (match) {
+                    return match[1];
+                }
+                
+                // Fallback: if no match but input looks like a URL, return it
+                if (inputUrl.startsWith('http')) {
+                    return inputUrl;
+                }
+                
+                return inputUrl;
             }
 
             // Function to format file size (if not already formatted)
@@ -234,7 +246,7 @@
                     unitIndex++;
                 }
                 
-                return `${size.toFixed(2)} ${units[unitIndex]}`;
+                return `📏 ${size.toFixed(2)} ${units[unitIndex]}`;
             }
 
             // Function to format date
@@ -287,8 +299,12 @@
                     const extractedUrl = extractTeraboxUrl(url);
                     console.log("Extracted URL:", extractedUrl);
                     
-                    // Create API URL with direct parameter addition instead of encoding
-                    const apiUrl = `https://terabox-test-api.wd-zone.workers.dev/?url=${extractedUrl}`;
+                    // Create API URL with proper URL encoding
+                    const encodedUrl = encodeURIComponent(extractedUrl);
+                    const apiUrl = `https://terabox-dl-api.vercel.app/api?url=${encodedUrl}`;
+                    
+                    // Fallback API if the primary one fails
+                    const fallbackApiUrl = `https://terabox-test-api.wd-zone.workers.dev/?url=${encodedUrl}`;
                     
                     // Update debug info
                     apiUrlText.textContent = `API URL: ${apiUrl}`;
@@ -306,7 +322,7 @@
                     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30-second timeout
                     
                     try {
-                        // Make the API request
+                        // Try the primary API first
                         const response = await fetch(apiUrl, {
                             signal: controller.signal,
                             method: 'GET',
@@ -343,11 +359,39 @@
                         
                         // Display the file info
                         showFileInfo(data);
-                    } catch (fetchError) {
-                        if (fetchError.name === 'AbortError') {
-                            throw new Error('Request timed out. The API service may be unavailable.');
-                        } else {
-                            throw fetchError;
+                    } catch (primaryApiError) {
+                        console.error("Primary API error:", primaryApiError);
+                        
+                        // Try the fallback API
+                        try {
+                            console.log("Trying fallback API:", fallbackApiUrl);
+                            
+                            const fallbackResponse = await fetch(fallbackApiUrl, {
+                                method: 'GET',
+                                headers: {
+                                    'Accept': 'application/json'
+                                },
+                                // New timeout for fallback
+                                signal: (new AbortController()).signal
+                            });
+                            
+                            if (!fallbackResponse.ok) {
+                                throw new Error(`Fallback server error: ${fallbackResponse.status}`);
+                            }
+                            
+                            const fallbackData = await fallbackResponse.json();
+                            console.log("Fallback API response:", fallbackData);
+                            
+                            if (fallbackData.error) {
+                                throw new Error(`Fallback API error: ${fallbackData.error}`);
+                            }
+                            
+                            // Display the fallback API data
+                            showFileInfo(fallbackData);
+                        } catch (fallbackError) {
+                            console.error("Fallback API error:", fallbackError);
+                            // If both APIs fail, throw the original error
+                            throw primaryApiError;
                         }
                     }
                 } catch (err) {
