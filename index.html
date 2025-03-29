@@ -27,7 +27,7 @@
             <p class="text-gray-600">Enter a Terabox or compatible URL to extract file information</p>
             <div class="mt-2 text-sm text-gray-500">
                 Supported domains: teraboxapp.com, terabox.com, 1024tera.com, terabox.app, teraboxpro.com, 
-                nephobox.com, 4funbox.com, dubox.com, and more
+                nephobox.com, 4funbox.com, dubox.com, terafileshare.com and more
             </div>
         </div>
 
@@ -147,7 +147,8 @@
                     'ufile\\.io',
                     'mirrorcreator\\.com',
                     'mirrorace\\.com',
-                    'mirrorace\\.org'
+                    'mirrorace\\.org',
+                    'terafileshare\\.com'
                 ];
                 
                 const regex = new RegExp(`(https?:\\/\\/(?:www\\.)?(?:${domainPatterns.join('|')})\\/s\\/[a-zA-Z0-9_\\-\\.]+)`, 'i');
@@ -198,8 +199,10 @@
                     const extractedUrl = extractTeraboxUrl(url);
                     console.log("Extracted URL:", extractedUrl);
                     
+                    // Create API URL with direct parameter addition instead of encoding
+                    const apiUrl = `https://terabox-test-api.wd-zone.workers.dev/?url=${extractedUrl}`;
+                    
                     // Update debug info
-                    const apiUrl = `https://terabox-test-api.wd-zone.workers.dev/?url=${encodeURIComponent(extractedUrl)}`;
                     apiUrlText.textContent = `API URL: ${apiUrl}`;
                     extractedUrlText.textContent = `Extracted URL: ${extractedUrl}`;
                     
