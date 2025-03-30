@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced M3U8 Player</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.8/hls.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css" />
+    <script type='text/javascript' src='//pl26257385.effectiveratecpm.com/c5/00/a0/c500a0861187f8237665508aedd6b06a.js'></script>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #121212;
@@ -20,15 +19,22 @@
             margin: 20px auto;
             padding: 20px;
             background-color: #1e1e1e;
-            border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
         .video-container {
             position: relative;
             width: 100%;
-            border-radius: 8px;
-            overflow: hidden;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
             margin-bottom: 20px;
+        }
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
         }
         .controls {
             display: flex;
@@ -37,74 +43,39 @@
             margin-bottom: 20px;
         }
         select, input, button {
-            padding: 12px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 4px;
             border: 1px solid #444;
             background-color: #2a2a2a;
             color: #f1f1f1;
             font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        select:focus, input:focus {
-            outline: none;
-            border-color: #007BFF;
-            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
         select {
             width: 100%;
-            cursor: pointer;
         }
         button {
             background-color: #007BFF;
             color: white;
             border: none;
             cursor: pointer;
-            font-weight: 600;
             transition: background-color 0.3s;
         }
         button:hover {
             background-color: #0056b3;
-            transform: translateY(-1px);
         }
-        button:active {
-            transform: translateY(1px);
-        }
-        .loading {
+        .channel-join {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            font-size: 16px;
+            gap: 10px;
+            margin-bottom: 15px;
         }
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(0, 123, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #007BFF;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .channel-join input {
+            flex-grow: 1;
         }
         .status {
-            padding: 12px;
+            padding: 10px;
             margin-top: 10px;
-            border-radius: 6px;
+            border-radius: 4px;
             background-color: #333;
-            font-size: 14px;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            color: #ffffff;
         }
         .dev-tools-warning {
             display: none;
@@ -134,14 +105,7 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>SEEU TV (ALL LIVE AND TV CHANNELS)</h1>
-        </div>
-        
-        <div id="loadingIndicator" class="loading">
-            <div class="spinner"></div>
-            <span>Loading channels...</span>
-        </div>
+        <h1>Advanced M3U8 Player</h1>
         
         <div class="video-container">
             <video id="videoPlayer" controls></video>
@@ -155,10 +119,18 @@
                 </select>
             </div>
             
+            <div class="channel-join">
+                <input type="text" id="customStreamUrl" placeholder="Enter M3U8 URL...">
+                <input type="text" id="customStreamTitle" placeholder="Enter Title...">
+                <button onclick="addCustomStream()">Add Channel</button>
+            </div>
+            
             <div class="status" id="status">
-                Status: Loading channels...
+                Status: Waiting for stream selection
             </div>
         </div>
+        
+        <div id="container-b00a6a94150222e97c088ffd59fc081a"></div>
     </div>
     
     <div id="devToolsWarning" class="dev-tools-warning hidden">
@@ -167,133 +139,30 @@
         <p>Please close developer tools to continue using the player.</p>
     </div>
 
+    <script async="async" data-cfasync="false" src="//pl26257429.effectiveratecpm.com/b00a6a94150222e97c088ffd59fc081a/invoke.js"></script>
+    
     <script>
-        // Initial stream sources - will be populated from channels.json
-        let streamSources = [];
+        // Stream sources data structure
+        const streamSources = [
+            { 
+                title: "Sample Stream 1", 
+                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" 
+            },
+            { 
+                title: "Sample Stream 2", 
+                url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" 
+            },
+            { 
+                title: "Sample News", 
+                url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" 
+            }
+        ];
 
         let hls = null;
-        let player = null;
         const video = document.getElementById('videoPlayer');
         const streamSelector = document.getElementById('streamSelector');
         const statusDisplay = document.getElementById('status');
         const devToolsWarning = document.getElementById('devToolsWarning');
-        const loadingIndicator = document.getElementById('loadingIndicator');
-
-        // Initialize the Plyr player
-        function initPlyr() {
-            if (player) {
-                player.destroy();
-            }
-            
-            player = new Plyr('#videoPlayer', {
-                captions: { active: true, update: true },
-                quality: { default: 576, options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240] },
-                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
-                controls: [
-                    'play-large', 'play', 'progress', 'current-time', 'mute', 
-                    'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-                ]
-            });
-        }
-
-        // Get the current repository URL
-        function getRepoUrl() {
-            // Extract the repository URL from the current page URL
-            const currentUrl = window.location.href;
-            // Return the repository base URL (this can be modified based on your actual hosting setup)
-            const urlParts = currentUrl.split('/');
-            // For GitHub Pages, the format is typically username.github.io/repo-name/
-            // So we want to get the base path
-            
-            if (urlParts[2].includes('github.io')) {
-                // Get up to the repo name for GitHub Pages
-                const username = urlParts[2].split('.')[0];
-                const repoName = urlParts[3];
-                return `https://${username}.github.io/${repoName}`;
-            }
-            
-            // For other hosting, just return the base URL up to the directory containing index.html
-            const basePath = urlParts.slice(0, urlParts.length - 1).join('/');
-            return basePath;
-        }
-
-        // Load channels from the channels.json file in the repository
-        function loadChannels() {
-            loadingIndicator.classList.remove('hidden');
-            statusDisplay.textContent = "Status: Loading channels...";
-            
-            const repoUrl = getRepoUrl();
-            const channelsJsonUrl = `${repoUrl}/channels.json`;
-            
-            fetch(channelsJsonUrl)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (Array.isArray(data) && data.length > 0) {
-                        // Validate that each item has title and url
-                        const validData = data.filter(item => 
-                            typeof item === 'object' && 
-                            item !== null && 
-                            typeof item.title === 'string' && 
-                            typeof item.url === 'string' &&
-                            item.url.trim() !== '' &&
-                            (item.url.endsWith('.m3u8') || item.url.includes('.m3u8?'))
-                        );
-                        
-                        if (validData.length > 0) {
-                            streamSources = validData;
-                            populateStreamSelector();
-                            statusDisplay.textContent = `Status: Loaded ${validData.length} channels`;
-                        } else {
-                            statusDisplay.textContent = "Status: channels.json doesn't contain valid streams with title and url";
-                        }
-                    } else {
-                        statusDisplay.textContent = "Status: channels.json must contain an array of streams";
-                    }
-                })
-                .catch(error => {
-                    statusDisplay.textContent = `Status: Error loading channels: ${error.message}`;
-                    console.error(error);
-                    
-                    // Fallback to local path if repository path fails
-                    console.log("Trying local path as fallback...");
-                    fetch('./channels.json')
-                        .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (Array.isArray(data) && data.length > 0) {
-                                const validData = data.filter(item => 
-                                    typeof item === 'object' && 
-                                    item !== null && 
-                                    typeof item.title === 'string' && 
-                                    typeof item.url === 'string' &&
-                                    item.url.trim() !== '' &&
-                                    (item.url.endsWith('.m3u8') || item.url.includes('.m3u8?'))
-                                );
-                                
-                                if (validData.length > 0) {
-                                    streamSources = validData;
-                                    populateStreamSelector();
-                                    statusDisplay.textContent = `Status: Loaded ${validData.length} channels (local)`;
-                                }
-                            }
-                        })
-                        .catch(localError => {
-                            statusDisplay.textContent = `Status: Failed to load channels from repo and local path`;
-                        });
-                })
-                .finally(() => {
-                    loadingIndicator.classList.add('hidden');
-                });
-        }
 
         // Populate the stream selector
         function populateStreamSelector() {
@@ -374,6 +243,31 @@
             }
         }
 
+        // Add a custom stream
+        function addCustomStream() {
+            const customUrl = document.getElementById('customStreamUrl').value.trim();
+            const customTitle = document.getElementById('customStreamTitle').value.trim() || "Custom Stream " + (streamSources.length + 1);
+            
+            if (customUrl) {
+                if (customUrl.endsWith('.m3u8') || customUrl.includes('.m3u8?')) {
+                    streamSources.push({ title: customTitle, url: customUrl });
+                    populateStreamSelector();
+                    
+                    // Select the newly added stream
+                    streamSelector.value = streamSources.length - 1;
+                    loadSelectedStream();
+                    
+                    // Clear the input fields
+                    document.getElementById('customStreamUrl').value = '';
+                    document.getElementById('customStreamTitle').value = '';
+                } else {
+                    statusDisplay.textContent = "Status: URL must be an M3U8 stream";
+                }
+            } else {
+                statusDisplay.textContent = "Status: Please enter a valid URL";
+            }
+        }
+
         // Developer Tools Detection
         function detectDevTools() {
             // Method 1: Window size difference
@@ -407,9 +301,7 @@
 
         // Initialize the player
         window.onload = function() {
-            initPlyr();
-            loadChannels(); // Automatically load channels from channels.json
-            
+            populateStreamSelector();
             checkDevTools();
             
             // Listen for F12 key
