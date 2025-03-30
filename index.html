@@ -196,12 +196,36 @@
             });
         }
 
-        // Load channels from the local channels.json file
+        // Get the current repository URL
+        function getRepoUrl() {
+            // Extract the repository URL from the current page URL
+            const currentUrl = window.location.href;
+            // Return the repository base URL (this can be modified based on your actual hosting setup)
+            const urlParts = currentUrl.split('/');
+            // For GitHub Pages, the format is typically username.github.io/repo-name/
+            // So we want to get the base path
+            
+            if (urlParts[2].includes('github.io')) {
+                // Get up to the repo name for GitHub Pages
+                const username = urlParts[2].split('.')[0];
+                const repoName = urlParts[3];
+                return `https://${username}.github.io/${repoName}`;
+            }
+            
+            // For other hosting, just return the base URL up to the directory containing index.html
+            const basePath = urlParts.slice(0, urlParts.length - 1).join('/');
+            return basePath;
+        }
+
+        // Load channels from the channels.json file in the repository
         function loadChannels() {
             loadingIndicator.classList.remove('hidden');
             statusDisplay.textContent = "Status: Loading channels...";
             
-            fetch('/channels.json')
+            const repoUrl = getRepoUrl();
+            const channelsJsonUrl = `${repoUrl}/channels.json`;
+            
+            fetch(channelsJsonUrl)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -234,6 +258,37 @@
                 .catch(error => {
                     statusDisplay.textContent = `Status: Error loading channels: ${error.message}`;
                     console.error(error);
+                    
+                    // Fallback to local path if repository path fails
+                    console.log("Trying local path as fallback...");
+                    fetch('./channels.json')
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (Array.isArray(data) && data.length > 0) {
+                                const validData = data.filter(item => 
+                                    typeof item === 'object' && 
+                                    item !== null && 
+                                    typeof item.title === 'string' && 
+                                    typeof item.url === 'string' &&
+                                    item.url.trim() !== '' &&
+                                    (item.url.endsWith('.m3u8') || item.url.includes('.m3u8?'))
+                                );
+                                
+                                if (validData.length > 0) {
+                                    streamSources = validData;
+                                    populateStreamSelector();
+                                    statusDisplay.textContent = `Status: Loaded ${validData.length} channels (local)`;
+                                }
+                            }
+                        })
+                        .catch(localError => {
+                            statusDisplay.textContent = `Status: Failed to load channels from repo and local path`;
+                        });
                 })
                 .finally(() => {
                     loadingIndicator.classList.add('hidden');
