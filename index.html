@@ -106,24 +106,6 @@
             font-size: 28px;
             color: #ffffff;
         }
-        .github-input {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            align-items: center;
-        }
-        .github-input input {
-            flex-grow: 1;
-        }
-        .json-info {
-            margin-top: 15px;
-            padding: 10px;
-            background-color: #2a2a2a;
-            border-radius: 6px;
-            font-size: 14px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
         .dev-tools-warning {
             display: none;
             position: fixed;
@@ -156,12 +138,7 @@
             <h1>Advanced M3U8 Player</h1>
         </div>
         
-        <div class="github-input">
-            <input type="text" id="githubJsonUrl" placeholder="Enter GitHub JSON URL...">
-            <button onclick="loadGithubJSON()">Load Channels</button>
-        </div>
-        
-        <div id="loadingIndicator" class="loading hidden">
+        <div id="loadingIndicator" class="loading">
             <div class="spinner"></div>
             <span>Loading channels...</span>
         </div>
@@ -179,12 +156,7 @@
             </div>
             
             <div class="status" id="status">
-                Status: Enter GitHub JSON URL to load channels
-            </div>
-            
-            <div id="jsonInfo" class="json-info hidden">
-                <h3>Current JSON Configuration</h3>
-                <pre id="jsonDisplay"></pre>
+                Status: Loading channels...
             </div>
         </div>
     </div>
@@ -196,7 +168,7 @@
     </div>
 
     <script>
-        // Initial stream sources - will be populated from GitHub JSON
+        // Initial stream sources - will be populated from channels.json
         let streamSources = [];
 
         let hls = null;
@@ -205,10 +177,7 @@
         const streamSelector = document.getElementById('streamSelector');
         const statusDisplay = document.getElementById('status');
         const devToolsWarning = document.getElementById('devToolsWarning');
-        const jsonDisplay = document.getElementById('jsonDisplay');
-        const jsonInfo = document.getElementById('jsonInfo');
         const loadingIndicator = document.getElementById('loadingIndicator');
-        const githubJsonUrlInput = document.getElementById('githubJsonUrl');
 
         // Initialize the Plyr player
         function initPlyr() {
@@ -227,38 +196,12 @@
             });
         }
 
-        // Convert GitHub URL to raw content URL
-        function convertToRawGitHubUrl(url) {
-            // Handle github.com URLs
-            if (url.includes('github.com')) {
-                return url.replace('github.com', 'raw.githubusercontent.com')
-                          .replace('/blob/', '/');
-            }
-            // Handle gist.github.com URLs
-            else if (url.includes('gist.github.com')) {
-                const gistId = url.split('/').pop();
-                return `https://gist.githubusercontent.com/raw/${gistId}`;
-            }
-            // If it's already a raw URL or another format, return as is
-            return url;
-        }
-
-        // Load JSON from GitHub
-        function loadGithubJSON() {
-            const githubUrl = githubJsonUrlInput.value.trim();
-            
-            if (!githubUrl) {
-                statusDisplay.textContent = "Status: Please enter a GitHub JSON URL";
-                return;
-            }
-            
+        // Load channels from the local channels.json file
+        function loadChannels() {
             loadingIndicator.classList.remove('hidden');
-            statusDisplay.textContent = "Status: Fetching channels from GitHub...";
+            statusDisplay.textContent = "Status: Loading channels...";
             
-            // Convert to raw URL if needed
-            const rawUrl = convertToRawGitHubUrl(githubUrl);
-            
-            fetch(rawUrl)
+            fetch('/channels.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -280,20 +223,16 @@
                         if (validData.length > 0) {
                             streamSources = validData;
                             populateStreamSelector();
-                            statusDisplay.textContent = `Status: Loaded ${validData.length} channels from GitHub JSON`;
-                            
-                            // Display the JSON data
-                            jsonDisplay.textContent = JSON.stringify(streamSources, null, 2);
-                            jsonInfo.classList.remove('hidden');
+                            statusDisplay.textContent = `Status: Loaded ${validData.length} channels`;
                         } else {
-                            statusDisplay.textContent = "Status: JSON file doesn't contain valid streams with title and url";
+                            statusDisplay.textContent = "Status: channels.json doesn't contain valid streams with title and url";
                         }
                     } else {
-                        statusDisplay.textContent = "Status: JSON file must contain an array of streams";
+                        statusDisplay.textContent = "Status: channels.json must contain an array of streams";
                     }
                 })
                 .catch(error => {
-                    statusDisplay.textContent = `Status: Error loading JSON: ${error.message}`;
+                    statusDisplay.textContent = `Status: Error loading channels: ${error.message}`;
                     console.error(error);
                 })
                 .finally(() => {
@@ -411,25 +350,10 @@
             setTimeout(checkDevTools, 1000); // Check every second
         }
 
-        // Add event listener for Enter key in GitHub URL input
-        githubJsonUrlInput.addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                loadGithubJSON();
-            }
-        });
-
         // Initialize the player
         window.onload = function() {
             initPlyr();
-            
-            // Pre-populate with some sample GitHub JSON URLs
-            const sampleUrls = [
-                "https://gist.github.com/anonymous/12345abcdef", // Just a placeholder
-                "https://github.com/username/repo/blob/main/channels.json" // Just a placeholder
-            ];
-            
-            // Add placeholder examples to the input
-            githubJsonUrlInput.placeholder = "e.g. " + sampleUrls[Math.floor(Math.random() * sampleUrls.length)];
+            loadChannels(); // Automatically load channels from channels.json
             
             checkDevTools();
             
