@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Sample News",
+    "url": "https://example.com/streams/news.m3u8"
+  },
+  {
+    "title": "Sports Channel HD",
+    "url": "https://cdn.example.org/live/sports_hd.m3u8"
+  },
+  {
+    "title": "Movie Network",
+    "url": "https://stream.example.net/vod/movies.m3u8"
+  },
+  {
+    "title": "Music TV",
+    "url": "https://music.example.com/live/channel1.m3u8?token=sample"
+  },
+  {
+    "title": "Documentary Channel",
+    "url": "https://docs.example.org/hls/main.m3u8"
+  },
+  {
+    "title": "Kids Entertainment",
+    "url": "https://kids.example.net/stream.m3u8"
+  },
+  {
+    "title": "Science & Technology",
+    "url": "https://science.example.com/tech.m3u8?quality=hd"
+  },
+  {
+    "title": "International News",
+    "url": "https://news.example.org/international/live.m3u8"
+  },
+  {
+    "title": "Comedy Central",
+    "url": "https://comedy.example.net/live/stream.m3u8"
+  },
+  {
+    "title": "Nature & Wildlife",
+    "url": "https://nature.example.com/wildlife.m3u8"
+  }
+]
