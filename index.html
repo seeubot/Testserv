@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Advanced M3U8 Player</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.8/hls.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css" />
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
             background-color: #121212;
@@ -18,22 +20,15 @@
             margin: 20px auto;
             padding: 20px;
             background-color: #1e1e1e;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
         }
         .video-container {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            border-radius: 8px;
+            overflow: hidden;
             margin-bottom: 20px;
-        }
-        #videoPlayer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #000;
         }
         .controls {
             display: flex;
@@ -42,39 +37,92 @@
             margin-bottom: 20px;
         }
         select, input, button {
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 6px;
             border: 1px solid #444;
             background-color: #2a2a2a;
             color: #f1f1f1;
             font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #007BFF;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
         }
         select {
             width: 100%;
+            cursor: pointer;
         }
         button {
             background-color: #007BFF;
             color: white;
             border: none;
             cursor: pointer;
+            font-weight: 600;
             transition: background-color 0.3s;
         }
         button:hover {
             background-color: #0056b3;
+            transform: translateY(-1px);
         }
-        .channel-join {
+        button:active {
+            transform: translateY(1px);
+        }
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            font-size: 16px;
+        }
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 123, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #007BFF;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .status {
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 6px;
+            background-color: #333;
+            font-size: 14px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: #ffffff;
+        }
+        .github-input {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
+            align-items: center;
         }
-        .channel-join input {
+        .github-input input {
             flex-grow: 1;
         }
-        .status {
+        .json-info {
+            margin-top: 15px;
             padding: 10px;
-            margin-top: 10px;
-            border-radius: 4px;
-            background-color: #333;
+            background-color: #2a2a2a;
+            border-radius: 6px;
+            font-size: 14px;
+            max-height: 200px;
+            overflow-y: auto;
         }
         .dev-tools-warning {
             display: none;
@@ -104,7 +152,19 @@
 </head>
 <body>
     <div class="container">
-        <h1>Advanced M3U8 Player</h1>
+        <div class="header">
+            <h1>Advanced M3U8 Player</h1>
+        </div>
+        
+        <div class="github-input">
+            <input type="text" id="githubJsonUrl" placeholder="Enter GitHub JSON URL...">
+            <button onclick="loadGithubJSON()">Load Channels</button>
+        </div>
+        
+        <div id="loadingIndicator" class="loading hidden">
+            <div class="spinner"></div>
+            <span>Loading channels...</span>
+        </div>
         
         <div class="video-container">
             <video id="videoPlayer" controls></video>
@@ -118,14 +178,13 @@
                 </select>
             </div>
             
-            <div class="channel-join">
-                <input type="text" id="customStreamUrl" placeholder="Enter M3U8 URL...">
-                <input type="text" id="customStreamTitle" placeholder="Enter Title...">
-                <button onclick="addCustomStream()">Add Channel</button>
+            <div class="status" id="status">
+                Status: Enter GitHub JSON URL to load channels
             </div>
             
-            <div class="status" id="status">
-                Status: Waiting for stream selection
+            <div id="jsonInfo" class="json-info hidden">
+                <h3>Current JSON Configuration</h3>
+                <pre id="jsonDisplay"></pre>
             </div>
         </div>
     </div>
@@ -137,27 +196,110 @@
     </div>
 
     <script>
-        // Stream sources data structure
-        const streamSources = [
-            { 
-                title: "Sample Stream 1", 
-                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" 
-            },
-            { 
-                title: "Sample Stream 2", 
-                url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" 
-            },
-            { 
-                title: "Sample News", 
-                url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" 
-            }
-        ];
+        // Initial stream sources - will be populated from GitHub JSON
+        let streamSources = [];
 
         let hls = null;
+        let player = null;
         const video = document.getElementById('videoPlayer');
         const streamSelector = document.getElementById('streamSelector');
         const statusDisplay = document.getElementById('status');
         const devToolsWarning = document.getElementById('devToolsWarning');
+        const jsonDisplay = document.getElementById('jsonDisplay');
+        const jsonInfo = document.getElementById('jsonInfo');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const githubJsonUrlInput = document.getElementById('githubJsonUrl');
+
+        // Initialize the Plyr player
+        function initPlyr() {
+            if (player) {
+                player.destroy();
+            }
+            
+            player = new Plyr('#videoPlayer', {
+                captions: { active: true, update: true },
+                quality: { default: 576, options: [4320, 2880, 2160, 1440, 1080, 720, 576, 480, 360, 240] },
+                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] },
+                controls: [
+                    'play-large', 'play', 'progress', 'current-time', 'mute', 
+                    'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+                ]
+            });
+        }
+
+        // Convert GitHub URL to raw content URL
+        function convertToRawGitHubUrl(url) {
+            // Handle github.com URLs
+            if (url.includes('github.com')) {
+                return url.replace('github.com', 'raw.githubusercontent.com')
+                          .replace('/blob/', '/');
+            }
+            // Handle gist.github.com URLs
+            else if (url.includes('gist.github.com')) {
+                const gistId = url.split('/').pop();
+                return `https://gist.githubusercontent.com/raw/${gistId}`;
+            }
+            // If it's already a raw URL or another format, return as is
+            return url;
+        }
+
+        // Load JSON from GitHub
+        function loadGithubJSON() {
+            const githubUrl = githubJsonUrlInput.value.trim();
+            
+            if (!githubUrl) {
+                statusDisplay.textContent = "Status: Please enter a GitHub JSON URL";
+                return;
+            }
+            
+            loadingIndicator.classList.remove('hidden');
+            statusDisplay.textContent = "Status: Fetching channels from GitHub...";
+            
+            // Convert to raw URL if needed
+            const rawUrl = convertToRawGitHubUrl(githubUrl);
+            
+            fetch(rawUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (Array.isArray(data) && data.length > 0) {
+                        // Validate that each item has title and url
+                        const validData = data.filter(item => 
+                            typeof item === 'object' && 
+                            item !== null && 
+                            typeof item.title === 'string' && 
+                            typeof item.url === 'string' &&
+                            item.url.trim() !== '' &&
+                            (item.url.endsWith('.m3u8') || item.url.includes('.m3u8?'))
+                        );
+                        
+                        if (validData.length > 0) {
+                            streamSources = validData;
+                            populateStreamSelector();
+                            statusDisplay.textContent = `Status: Loaded ${validData.length} channels from GitHub JSON`;
+                            
+                            // Display the JSON data
+                            jsonDisplay.textContent = JSON.stringify(streamSources, null, 2);
+                            jsonInfo.classList.remove('hidden');
+                        } else {
+                            statusDisplay.textContent = "Status: JSON file doesn't contain valid streams with title and url";
+                        }
+                    } else {
+                        statusDisplay.textContent = "Status: JSON file must contain an array of streams";
+                    }
+                })
+                .catch(error => {
+                    statusDisplay.textContent = `Status: Error loading JSON: ${error.message}`;
+                    console.error(error);
+                })
+                .finally(() => {
+                    loadingIndicator.classList.add('hidden');
+                });
+        }
 
         // Populate the stream selector
         function populateStreamSelector() {
@@ -238,31 +380,6 @@
             }
         }
 
-        // Add a custom stream
-        function addCustomStream() {
-            const customUrl = document.getElementById('customStreamUrl').value.trim();
-            const customTitle = document.getElementById('customStreamTitle').value.trim() || "Custom Stream " + (streamSources.length + 1);
-            
-            if (customUrl) {
-                if (customUrl.endsWith('.m3u8') || customUrl.includes('.m3u8?')) {
-                    streamSources.push({ title: customTitle, url: customUrl });
-                    populateStreamSelector();
-                    
-                    // Select the newly added stream
-                    streamSelector.value = streamSources.length - 1;
-                    loadSelectedStream();
-                    
-                    // Clear the input fields
-                    document.getElementById('customStreamUrl').value = '';
-                    document.getElementById('customStreamTitle').value = '';
-                } else {
-                    statusDisplay.textContent = "Status: URL must be an M3U8 stream";
-                }
-            } else {
-                statusDisplay.textContent = "Status: Please enter a valid URL";
-            }
-        }
-
         // Developer Tools Detection
         function detectDevTools() {
             // Method 1: Window size difference
@@ -294,9 +411,26 @@
             setTimeout(checkDevTools, 1000); // Check every second
         }
 
+        // Add event listener for Enter key in GitHub URL input
+        githubJsonUrlInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                loadGithubJSON();
+            }
+        });
+
         // Initialize the player
         window.onload = function() {
-            populateStreamSelector();
+            initPlyr();
+            
+            // Pre-populate with some sample GitHub JSON URLs
+            const sampleUrls = [
+                "https://gist.github.com/anonymous/12345abcdef", // Just a placeholder
+                "https://github.com/username/repo/blob/main/channels.json" // Just a placeholder
+            ];
+            
+            // Add placeholder examples to the input
+            githubJsonUrlInput.placeholder = "e.g. " + sampleUrls[Math.floor(Math.random() * sampleUrls.length)];
+            
             checkDevTools();
             
             // Listen for F12 key
