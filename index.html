@@ -3,369 +3,315 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JW Player with DRM</title>
-    <script src="https://content.jwplatform.com/libraries/SAHhwvZq.js"></script>
+    <title>Advanced M3U8 Player</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.8/hls.min.js"></script>
     <style>
-        #playerContainer {
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #f1f1f1;
+        }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .video-container {
             position: relative;
             width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
+            padding-top: 56.25%; /* 16:9 Aspect Ratio */
+            margin-bottom: 20px;
         }
-        
-        #jwplayerDiv {
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            aspect-ratio: 16/9;
+            height: 100%;
+            background-color: #000;
         }
-        
-        #customControls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #333;
-            padding: 10px;
-            border-radius: 0 0 4px 4px;
-        }
-        
-        .controlButton {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 8px 16px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        
-        #playButton {
-            background-color: #4CAF50;
-        }
-        
-        #joinButton {
-            background-color: #2196F3;
-        }
-        
-        #volumeControl {
-            display: flex;
-            align-items: center;
-        }
-        
-        #volumeSlider {
-            width: 100px;
-            margin: 0 10px;
-        }
-        
-        #joinDialog {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-        
-        #dialogForm {
+        .controls {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
-        
-        #overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
+        select, input, button {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background-color: #2a2a2a;
+            color: #f1f1f1;
+            font-size: 16px;
+        }
+        select {
             width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 999;
         }
-        
-        .closeBtn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            cursor: pointer;
-            font-size: 18px;
-        }
-        
-        #securityWarning {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.9);
+        button {
+            background-color: #007BFF;
             color: white;
-            z-index: 2000;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .channel-join {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .channel-join input {
+            flex-grow: 1;
+        }
+        .status {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 4px;
+            background-color: #333;
+        }
+        .dev-tools-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(220, 20, 20, 0.95);
+            color: white;
+            z-index: 9999;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
             text-align: center;
             padding: 20px;
+        }
+        .dev-tools-warning h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <div id="playerContainer">
-        <div id="jwplayerDiv"></div>
-        <div id="customControls">
-            <button id="playButton" class="controlButton">Play</button>
-            <div id="volumeControl">
-                <span>Volume:</span>
-                <input type="range" id="volumeSlider" min="0" max="100" value="80">
-                <span id="volumeValue">80%</span>
+    <div class="container">
+        <h1>Advanced M3U8 Player</h1>
+        
+        <div class="video-container">
+            <video id="videoPlayer" controls></video>
+        </div>
+        
+        <div class="controls">
+            <div class="server-selection">
+                <label for="streamSelector">Select Stream:</label>
+                <select id="streamSelector" onchange="loadSelectedStream()">
+                    <option value="" disabled selected>Select a stream</option>
+                </select>
             </div>
-            <button id="joinButton" class="controlButton">Join Channel</button>
+            
+            <div class="channel-join">
+                <input type="text" id="customStreamUrl" placeholder="Enter M3U8 URL...">
+                <input type="text" id="customStreamTitle" placeholder="Enter Title...">
+                <button onclick="addCustomStream()">Add Channel</button>
+            </div>
+            
+            <div class="status" id="status">
+                Status: Waiting for stream selection
+            </div>
         </div>
     </div>
     
-    <div id="overlay"></div>
-    
-    <div id="joinDialog">
-        <span class="closeBtn" onclick="closeDialog()">×</span>
-        <h3>Join Channel</h3>
-        <form id="dialogForm">
-            <input type="text" id="nameInput" placeholder="Your Name" required>
-            <input type="email" id="emailInput" placeholder="Your Email" required>
-            <button type="submit" class="controlButton">Submit</button>
-        </form>
+    <div id="devToolsWarning" class="dev-tools-warning hidden">
+        <h2>⚠️ Developer Tools Detected ⚠️</h2>
+        <p>For security reasons, access to this player has been restricted.</p>
+        <p>Please close developer tools to continue using the player.</p>
     </div>
-    
-    <div id="securityWarning">
-        <h2>Developer Tools Detected</h2>
-        <p>Please close Developer Tools to continue viewing this content.</p>
-        <button onclick="location.reload()" class="controlButton">Reload Page</button>
-    </div>
-    
+
     <script>
-        // Player instance variable
-        let player;
-        
-        // Fetch the DRM keys from the JSON file
-        fetch('drmKeys.json')
-            .then(response => response.json())
-            .then(data => {
-                // Set up JW Player with the fetched keys
-                player = jwplayer("jwplayerDiv").setup({
-                    file: "https://delta1tatasky.akamaized.net/out/i/2970531.mpd",
-                    type: "dash",
-                    drm: {
-                        "clearkey": {
-                            "keyId": data.keyId,
-                            "key": data.key
-                        }
-                    },
-                    controls: false // Disable default controls
+        // Stream sources data structure
+        const streamSources = [
+            { 
+                title: "Sample Stream 1", 
+                url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" 
+            },
+            { 
+                title: "Sample Stream 2", 
+                url: "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8" 
+            },
+            { 
+                title: "Sample News", 
+                url: "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" 
+            }
+        ];
+
+        let hls = null;
+        const video = document.getElementById('videoPlayer');
+        const streamSelector = document.getElementById('streamSelector');
+        const statusDisplay = document.getElementById('status');
+        const devToolsWarning = document.getElementById('devToolsWarning');
+
+        // Populate the stream selector
+        function populateStreamSelector() {
+            streamSelector.innerHTML = '<option value="" disabled selected>Select a stream</option>';
+            
+            streamSources.forEach((stream, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = stream.title;
+                streamSelector.appendChild(option);
+            });
+        }
+
+        // Initialize HLS.js if supported
+        function initializePlayer(streamUrl) {
+            if (hls) {
+                hls.destroy();
+            }
+
+            if (Hls.isSupported()) {
+                hls = new Hls({
+                    debug: false,
+                    enableWorker: true,
+                    lowLatencyMode: true
                 });
                 
-                // Initialize custom controls
-                initCustomControls();
-            })
-            .catch(error => console.error('Error fetching DRM keys:', error));
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    statusDisplay.textContent = "Status: Stream loaded successfully";
+                    video.play().catch(error => {
+                        console.log('Autoplay prevented:', error);
+                        statusDisplay.textContent = "Status: Ready (click play to start)";
+                    });
+                });
+                
+                hls.on(Hls.Events.ERROR, function(event, data) {
+                    if (data.fatal) {
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                statusDisplay.textContent = "Status: Network error, trying to recover...";
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                statusDisplay.textContent = "Status: Media error, trying to recover...";
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                statusDisplay.textContent = "Status: Fatal error encountered. Try another stream.";
+                                hls.destroy();
+                                break;
+                        }
+                    }
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // For Safari
+                video.src = streamUrl;
+                video.addEventListener('loadedmetadata', function() {
+                    statusDisplay.textContent = "Status: Stream loaded successfully (native HLS)";
+                    video.play().catch(error => {
+                        console.log('Autoplay prevented:', error);
+                        statusDisplay.textContent = "Status: Ready (click play to start)";
+                    });
+                });
+            } else {
+                statusDisplay.textContent = "Status: HLS is not supported in your browser";
+            }
+        }
+
+        // Load the selected stream
+        function loadSelectedStream() {
+            const selectedIndex = streamSelector.value;
+            if (selectedIndex !== "") {
+                const selectedStream = streamSources[selectedIndex];
+                statusDisplay.textContent = "Status: Loading " + selectedStream.title + "...";
+                initializePlayer(selectedStream.url);
+            }
+        }
+
+        // Add a custom stream
+        function addCustomStream() {
+            const customUrl = document.getElementById('customStreamUrl').value.trim();
+            const customTitle = document.getElementById('customStreamTitle').value.trim() || "Custom Stream " + (streamSources.length + 1);
             
-        // Initialize custom controls functionality
-        function initCustomControls() {
-            const playButton = document.getElementById('playButton');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const volumeValue = document.getElementById('volumeValue');
-            const joinButton = document.getElementById('joinButton');
-            const overlay = document.getElementById('overlay');
-            const joinDialog = document.getElementById('joinDialog');
-            const dialogForm = document.getElementById('dialogForm');
-            
-            // Play/Pause toggle
-            playButton.addEventListener('click', function() {
-                const state = player.getState();
-                if (state === 'playing') {
-                    player.pause();
-                    playButton.textContent = 'Play';
+            if (customUrl) {
+                if (customUrl.endsWith('.m3u8') || customUrl.includes('.m3u8?')) {
+                    streamSources.push({ title: customTitle, url: customUrl });
+                    populateStreamSelector();
+                    
+                    // Select the newly added stream
+                    streamSelector.value = streamSources.length - 1;
+                    loadSelectedStream();
+                    
+                    // Clear the input fields
+                    document.getElementById('customStreamUrl').value = '';
+                    document.getElementById('customStreamTitle').value = '';
                 } else {
-                    player.play();
-                    playButton.textContent = 'Pause';
-                }
-            });
-            
-            // Update play button text when player state changes
-            player.on('play', function() {
-                playButton.textContent = 'Pause';
-            });
-            
-            player.on('pause', function() {
-                playButton.textContent = 'Play';
-            });
-            
-            // Volume control
-            volumeSlider.addEventListener('input', function() {
-                const volume = this.value / 100;
-                player.setVolume(volume);
-                volumeValue.textContent = this.value + '%';
-            });
-            
-            // Join channel button
-            joinButton.addEventListener('click', function() {
-                overlay.style.display = 'block';
-                joinDialog.style.display = 'block';
-            });
-            
-            // Close dialog when clicking outside
-            overlay.addEventListener('click', closeDialog);
-            
-            // Form submission
-            dialogForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const name = document.getElementById('nameInput').value;
-                const email = document.getElementById('emailInput').value;
-                
-                // Here you would typically send this data to your server
-                console.log('Joining channel with:', { name, email });
-                
-                // Show success message
-                alert('Thank you for joining our channel!');
-                
-                // Close the dialog
-                closeDialog();
-                
-                // Clear form
-                this.reset();
-            });
-        }
-        
-        // Function to close the join dialog
-        function closeDialog() {
-            document.getElementById('overlay').style.display = 'none';
-            document.getElementById('joinDialog').style.display = 'none';
-        }
-        
-        // SECURITY MEASURES
-        
-        // Disable right-click
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-        });
-        
-        // Disable specific keyboard shortcuts like F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-        document.addEventListener('keydown', function(e) {
-            // F12 or Ctrl+Shift+I or Ctrl+Shift+J or Ctrl+U
-            if (e.key === 'F12' || 
-              (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || 
-              (e.ctrlKey && e.key === 'U')) {
-                e.preventDefault();
-                showSecurityWarning();
-            }
-        });
-        
-        // Prevent the use of Ctrl+Shift+C (Element inspector)
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-                e.preventDefault();
-                showSecurityWarning();
-            }
-        });
-        
-        // Detect devtools based on window size manipulation
-        var devtoolsOpen = false;
-        setInterval(function() {
-            if (window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100) {
-                if (!devtoolsOpen) {
-                    devtoolsOpen = true;
-                    console.log("Developer Tools are open.");
-                    showSecurityWarning();
+                    statusDisplay.textContent = "Status: URL must be an M3U8 stream";
                 }
             } else {
-                devtoolsOpen = false;
-                hideSecurityWarning();
+                statusDisplay.textContent = "Status: Please enter a valid URL";
             }
-        }, 1000);
-        
-        // Additional detection method using console debugging
-        (function() {
-            let devtools = {
-                isOpen: false,
-                orientation: undefined
-            };
+        }
+
+        // Developer Tools Detection
+        function detectDevTools() {
+            // Method 1: Window size difference
+            const devToolsDetected = 
+                window.outerHeight - window.innerHeight > 200 || 
+                window.outerWidth - window.innerWidth > 200;
             
-            const threshold = 160;
+            // Method 2: Firebug detection
+            const isFirebug = window.console && (window.console.firebug || window.console.exception);
             
-            const emitEvent = (isOpen, orientation) => {
-                devtools.isOpen = isOpen;
-                devtools.orientation = orientation;
-                if (isOpen) {
-                    showSecurityWarning();
-                }
-            };
+            // Method 3: Check for devtools orientation
+            const isDevToolsOpen = 
+                (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || 
+                isFirebug || 
+                devToolsDetected;
             
-            setInterval(() => {
-                const widthThreshold = window.innerWidth - window.outerWidth > threshold;
-                const heightThreshold = window.innerHeight - window.outerHeight > threshold;
-                const orientation = widthThreshold ? 'vertical' : 'horizontal';
-                
+            return isDevToolsOpen;
+        }
+
+        // Check for Developer Tools periodically
+        function checkDevTools() {
+            if (detectDevTools()) {
+                devToolsWarning.classList.remove('hidden');
+                if (video.play) video.pause();
+            } else {
+                devToolsWarning.classList.add('hidden');
+            }
+            
+            setTimeout(checkDevTools, 1000); // Check every second
+        }
+
+        // Initialize the player
+        window.onload = function() {
+            populateStreamSelector();
+            checkDevTools();
+            
+            // Listen for F12 key
+            window.addEventListener('keydown', function(event) {
+                // F12 key or Ctrl+Shift+I/J/C
                 if (
-                    !(heightThreshold && widthThreshold) &&
-                    ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)
+                    event.keyCode === 123 || 
+                    (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74 || event.keyCode === 67))
                 ) {
-                    if (!devtools.isOpen || devtools.orientation !== orientation) {
-                        emitEvent(true, orientation);
-                    }
-                } else {
-                    if (devtools.isOpen) {
-                        emitEvent(false, null);
-                    }
+                    event.preventDefault();
+                    devToolsWarning.classList.remove('hidden');
+                    if (video.play) video.pause();
                 }
-            }, 500);
-            
-            // Check if debugger is connected
-            if (typeof process !== 'undefined' && process.versions && process.versions.node) {
-                showSecurityWarning();
-            }
-        })();
-        
-        // Show security warning
-        function showSecurityWarning() {
-            const warning = document.getElementById('securityWarning');
-            warning.style.display = 'flex';
-            if (player && player.getState) {
-                player.pause();
-            }
-        }
-        
-        // Hide security warning
-        function hideSecurityWarning() {
-            const warning = document.getElementById('securityWarning');
-            warning.style.display = 'none';
-        }
-        
-        // Another layer of protection - clear the page if console is open
-        (() => {
-            let checkCount = 0;
-            const checkConsole = () => {
-                const startTime = new Date().getTime();
-                debugger;
-                const endTime = new Date().getTime();
-                const diff = endTime - startTime;
-                
-                if (diff > 100) {
-                    showSecurityWarning();
-                }
-                
-                if (checkCount++ < 1000) {
-                    setTimeout(checkConsole, 1000);
-                }
-            };
-            
-            setTimeout(checkConsole, 1000);
-        })();
+            });
+        };
     </script>
 </body>
 </html>
