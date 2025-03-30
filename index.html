@@ -3,796 +3,369 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cricket Dashboard</title>
+    <title>JW Player with DRM</title>
+    <script src="https://content.jwplatform.com/libraries/SAHhwvZq.js"></script>
     <style>
-        :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #047857;
-            --accent-color: #0ea5e9;
-            --bg-color: #f8fafc;
-            --card-bg: #ffffff;
-            --text-color: #1e293b;
-            --text-light: #64748b;
-            --border-color: #e2e8f0;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1200px;
+        #playerContainer {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 0 1rem;
         }
-
-        header {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        
+        #jwplayerDiv {
+            width: 100%;
+            aspect-ratio: 16/9;
         }
-
-        .header-content {
+        
+        #customControls {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: #333;
+            padding: 10px;
+            border-radius: 0 0 4px 4px;
         }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .logo svg {
-            width: 2rem;
-            height: 2rem;
-            fill: currentColor;
-        }
-
-        nav ul {
-            display: flex;
-            gap: 1.5rem;
-            list-style: none;
-        }
-
-        nav a {
+        
+        .controlButton {
+            background-color: #4CAF50;
+            border: none;
             color: white;
+            padding: 8px 16px;
+            text-align: center;
             text-decoration: none;
-            font-weight: 500;
-            padding: 0.5rem 0;
-            transition: color 0.3s;
+            display: inline-block;
+            font-size: 14px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
         }
-
-        nav a:hover {
-            color: var(--accent-color);
+        
+        #playButton {
+            background-color: #4CAF50;
         }
-
-        main {
-            padding: 2rem 0;
+        
+        #joinButton {
+            background-color: #2196F3;
         }
-
-        .section-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .match-grid, .player-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .match-card, .player-card {
-            background-color: var(--card-bg);
-            border-radius: 0.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            padding: 1.5rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .match-card:hover, .player-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .match-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .match-type {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 0.25rem 0.5rem;
-            border-radius: 0.25rem;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .match-date {
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        .match-teams {
+        
+        #volumeControl {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
         }
-
-        .team {
+        
+        #volumeSlider {
+            width: 100px;
+            margin: 0 10px;
+        }
+        
+        #joinDialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+        
+        #dialogForm {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
+            gap: 10px;
         }
-
-        .team-flag {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-bottom: 0.5rem;
-            background-color: #f4f4f4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .versus {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin: 0 0.5rem;
-        }
-
-        .match-status {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 1rem;
-            padding: 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-        .live {
-            background-color: #fee2e2;
-            color: #dc2626;
-        }
-
-        .completed {
-            background-color: #ecfdf5;
-            color: var(--secondary-color);
-        }
-
-        .upcoming {
-            background-color: #eff6ff;
-            color: #2563eb;
-        }
-
-        .score {
-            font-weight: bold;
-            margin-top: 0.5rem;
-        }
-
-        .player-card-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .player-image {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: #f4f4f4;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-        }
-
-        .player-info h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.25rem;
-        }
-
-        .player-country {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        .player-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .stat-item {
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            padding: 0.5rem;
-            text-align: center;
-            background-color: #fafafa;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: var(--text-light);
-        }
-
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 1.5rem;
-        }
-
-        .tab {
-            padding: 0.75rem 1.5rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text-light);
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        .tab:hover:not(.active) {
-            color: var(--accent-color);
-        }
-
-        .tab-content {
+        
+        #overlay {
             display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 2rem;
-            font-size: 1.25rem;
-            color: var(--text-light);
-        }
-
-        .loading svg {
-            animation: spin 1s linear infinite;
-            margin-right: 0.5rem;
-        }
-
-        .error-message {
-            color: #dc2626;
-            text-align: center;
-            padding: 2rem;
-            background-color: #fee2e2;
-            border-radius: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .search-container {
-            margin-bottom: 1.5rem;
-        }
-
-        .search-input {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        input[type="text"] {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            font-size: 1rem;
-        }
-
-        button {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        button:hover {
-            background-color: #1c3175;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .pagination-btn {
-            padding: 0.5rem 1rem;
-            background-color: white;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .pagination-btn.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .pagination-btn:hover:not(.active) {
-            background-color: #f1f5f9;
-        }
-
-        .scoreboard {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1.5rem;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
         }
-
-        .scoreboard th, .scoreboard td {
-            padding: 0.75rem;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .scoreboard th {
-            background-color: #f1f5f9;
-            font-weight: 600;
-        }
-
-        .scoreboard tr:hover {
-            background-color: #f8fafc;
-        }
-
-        .innings-toggle {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .innings-btn {
-            flex: 1;
-            padding: 0.5rem;
-            text-align: center;
-            background-color: #f1f5f9;
-            border: 1px solid var(--border-color);
-            border-radius: 0.25rem;
+        
+        .closeBtn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 18px;
         }
-
-        .innings-btn.active {
-            background-color: var(--primary-color);
+        
+        #securityWarning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
             color: white;
-            border-color: var(--primary-color);
-        }
-
-        footer {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 1.5rem 0;
-            margin-top: 2rem;
-        }
-
-        .footer-content {
+            z-index: 2000;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-        }
-
-        .footer-links ul {
-            display: flex;
-            gap: 1.5rem;
-            list-style: none;
-        }
-
-        .footer-links a {
-            color: white;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .footer-links a:hover {
-            color: var(--accent-color);
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .match-grid, .player-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            nav ul {
-                gap: 1rem;
-            }
-
-            .footer-content {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-
-            .footer-links ul {
-                justify-content: center;
-            }
+            font-size: 24px;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container header-content">
-            <div class="logo">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="2" x2="12" y2="4"></line>
-                    <line x1="12" y1="20" x2="12" y2="22"></line>
-                    <line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line>
-                    <line x1="17.66" y1="17.66" x2="19.07" y2="19.07"></line>
-                    <line x1="2" y1="12" x2="4" y2="12"></line>
-                    <line x1="20" y1="12" x2="22" y2="12"></line>
-                    <line x1="4.93" y1="19.07" x2="6.34" y2="17.66"></line>
-                    <line x1="17.66" y1="6.34" x2="19.07" y2="4.93"></line>
-                </svg>
-                Cricket Dashboard
+    <div id="playerContainer">
+        <div id="jwplayerDiv"></div>
+        <div id="customControls">
+            <button id="playButton" class="controlButton">Play</button>
+            <div id="volumeControl">
+                <span>Volume:</span>
+                <input type="range" id="volumeSlider" min="0" max="100" value="80">
+                <span id="volumeValue">80%</span>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#" class="tab-link" data-tab="matches">Matches</a></li>
-                    <li><a href="#" class="tab-link" data-tab="players">Players</a></li>
-                    <li><a href="#" class="tab-link" data-tab="rankings">Rankings</a></li>
-                </ul>
-            </nav>
+            <button id="joinButton" class="controlButton">Join Channel</button>
         </div>
-    </header>
-
-    <main class="container">
-        <div class="tabs">
-            <button class="tab active" data-tab="matches">Matches</button>
-            <button class="tab" data-tab="players">Players</button>
-            <button class="tab" data-tab="rankings">Rankings</button>
-        </div>
-
-        <div id="matches" class="tab-content active">
-            <div class="search-container">
-                <h2 class="section-title">Cricket Matches</h2>
-                <div class="search-input">
-                    <input type="text" id="match-search" placeholder="Search for matches...">
-                    <button id="match-search-btn">Search</button>
-                </div>
-            </div>
-
-            <div id="match-filters" class="card">
-                <div class="filter-options">
-                    <button class="filter-btn active" data-filter="all">All Matches</button>
-                    <button class="filter-btn" data-filter="live">Live</button>
-                    <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-                    <button class="filter-btn" data-filter="completed">Completed</button>
-                </div>
-            </div>
-
-            <div id="matches-container" class="match-grid">
-                <div class="loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="2" x2="12" y2="6"></line>
-                        <line x1="12" y1="18" x2="12" y2="22"></line>
-                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                        <line x1="2" y1="12" x2="6" y2="12"></line>
-                        <line x1="18" y1="12" x2="22" y2="12"></line>
-                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                    </svg>
-                    Loading matches...
-                </div>
-            </div>
-            
-            <div id="match-pagination" class="pagination"></div>
-        </div>
-
-        <div id="match-details" class="tab-content">
-            <h2 class="section-title">Match Details</h2>
-            <button id="back-to-matches" class="back-btn">← Back to Matches</button>
-            
-            <div id="match-info" class="card">
-                <div class="loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="2" x2="12" y2="6"></line>
-                        <line x1="12" y1="18" x2="12" y2="22"></line>
-                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                        <line x1="2" y1="12" x2="6" y2="12"></line>
-                        <line x1="18" y1="12" x2="22" y2="12"></line>
-                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                    </svg>
-                    Loading match details...
-                </div>
-            </div>
-            
-            <h3 class="section-title">Scorecard</h3>
-            <div class="innings-toggle">
-                <button class="innings-btn active" data-innings="1">1st Innings</button>
-                <button class="innings-btn" data-innings="2">2nd Innings</button>
-            </div>
-            
-            <div id="scoreboard-container"></div>
-        </div>
-
-        <div id="players" class="tab-content">
-            <div class="search-container">
-                <h2 class="section-title">Cricket Players</h2>
-                <div class="search-input">
-                    <input type="text" id="player-search" placeholder="Search for players...">
-                    <button id="player-search-btn">Search</button>
-                </div>
-            </div>
-
-            <div id="players-container" class="player-grid">
-                <div class="loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="2" x2="12" y2="6"></line>
-                        <line x1="12" y1="18" x2="12" y2="22"></line>
-                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                        <line x1="2" y1="12" x2="6" y2="12"></line>
-                        <line x1="18" y1="12" x2="22" y2="12"></line>
-                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                    </svg>
-                    Loading players...
-                </div>
-            </div>
-            
-            <div id="player-pagination" class="pagination"></div>
-        </div>
-
-        <div id="player-details" class="tab-content">
-            <h2 class="section-title">Player Details</h2>
-            <button id="back-to-players" class="back-btn">← Back to Players</button>
-            
-            <div id="player-info" class="card">
-                <div class="loading">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="12" y1="2" x2="12" y2="6"></line>
-                        <line x1="12" y1="18" x2="12" y2="22"></line>
-                        <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                        <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                        <line x1="2" y1="12" x2="6" y2="12"></line>
-                        <line x1="18" y1="12" x2="22" y2="12"></line>
-                        <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                        <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                    </svg>
-                    Loading player details...
-                </div>
-            </div>
-            
-            <h3 class="section-title">Career Statistics</h3>
-            <div id="player-stats" class="card"></div>
-        </div>
-
-        <div id="rankings" class="tab-content">
-            <h2 class="section-title">ICC Rankings</h2>
-            
-            <div class="card">
-                <div class="tabs">
-                    <button class="ranking-tab active" data-format="test">Test</button>
-                    <button class="ranking-tab" data-format="odi">ODI</button>
-                    <button class="ranking-tab" data-format="t20">T20</button>
-                </div>
-                
-                <div class="tabs">
-                    <button class="ranking-type-tab active" data-type="batting">Batting</button>
-                    <button class="ranking-type-tab" data-type="bowling">Bowling</button>
-                    <button class="ranking-type-tab" data-type="all-rounder">All-Rounder</button>
-                    <button class="ranking-type-tab" data-type="teams">Teams</button>
-                </div>
-                
-                <div id="rankings-container">
-                    <div class="loading">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="12" y1="2" x2="12" y2="6"></line>
-                            <line x1="12" y1="18" x2="12" y2="22"></line>
-                            <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-                            <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-                            <line x1="2" y1="12" x2="6" y2="12"></line>
-                            <line x1="18" y1="12" x2="22" y2="12"></line>
-                            <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-                            <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-                        </svg>
-                        Loading rankings...
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <footer>
-        <div class="container footer-content">
-            <div class="copyright">
-                &copy; 2025 Cricket Dashboard
-            </div>
-            <div class="footer-links">
-                <ul>
-                    <li><a href="#">About</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
-                </ul>
-            </div>
-        </div>
-    </footer>
-
+    </div>
+    
+    <div id="overlay"></div>
+    
+    <div id="joinDialog">
+        <span class="closeBtn" onclick="closeDialog()">×</span>
+        <h3>Join Channel</h3>
+        <form id="dialogForm">
+            <input type="text" id="nameInput" placeholder="Your Name" required>
+            <input type="email" id="emailInput" placeholder="Your Email" required>
+            <button type="submit" class="controlButton">Submit</button>
+        </form>
+    </div>
+    
+    <div id="securityWarning">
+        <h2>Developer Tools Detected</h2>
+        <p>Please close Developer Tools to continue viewing this content.</p>
+        <button onclick="location.reload()" class="controlButton">Reload Page</button>
+    </div>
+    
     <script>
-        // Configuration
-        const API_BASE_URL = 'https://api.cricapi.com/v1';
-        const API_KEY = '9d365a00-2148-4748-9f46-26852cf932a9'; // Replace with your Cricket API key
+        // Player instance variable
+        let player;
         
-        // DOM Elements
-        const tabButtons = document.querySelectorAll('.tab');
-        const tabContents = document.querySelectorAll('.tab-content');
-        const tabLinks = document.querySelectorAll('.tab-link');
-        const matchesContainer = document.getElementById('matches-container');
-        const playersContainer = document.getElementById('players-container');
-        const rankingsContainer = document.getElementById('rankings-container');
-        const matchPagination = document.getElementById('match-pagination');
-        const playerPagination = document.getElementById('player-pagination');
-        const backToMatches = document.getElementById('back-to-matches');
-        const backToPlayers = document.getElementById('back-to-players');
-        const matchInfo = document.getElementById('match-info');
-        const scoreboardContainer = document.getElementById('scoreboard-container');
-        const playerInfo = document.getElementById('player-info');
-        const playerStats = document.getElementById('player-stats');
-        const matchFilters = document.querySelectorAll('.filter-btn');
-        const inningsButtons = document.querySelectorAll('.innings-btn');
-        const rankingTabs = document.querySelectorAll('.ranking-tab');
-        const rankingTypeTabs = document.querySelectorAll('.ranking-type-tab');
-        const matchSearchBtn = document.getElementById('match-search-btn');
-        const playerSearchBtn = document.getElementById('player-search-btn');
+        // Fetch the DRM keys from the JSON file
+        fetch('drmKeys.json')
+            .then(response => response.json())
+            .then(data => {
+                // Set up JW Player with the fetched keys
+                player = jwplayer("jwplayerDiv").setup({
+                    file: "https://delta1tatasky.akamaized.net/out/i/2970531.mpd",
+                    type: "dash",
+                    drm: {
+                        "clearkey": {
+                            "keyId": data.keyId,
+                            "key": data.key
+                        }
+                    },
+                    controls: false // Disable default controls
+                });
+                
+                // Initialize custom controls
+                initCustomControls();
+            })
+            .catch(error => console.error('Error fetching DRM keys:', error));
+            
+        // Initialize custom controls functionality
+        function initCustomControls() {
+            const playButton = document.getElementById('playButton');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeValue = document.getElementById('volumeValue');
+            const joinButton = document.getElementById('joinButton');
+            const overlay = document.getElementById('overlay');
+            const joinDialog = document.getElementById('joinDialog');
+            const dialogForm = document.getElementById('dialogForm');
+            
+            // Play/Pause toggle
+            playButton.addEventListener('click', function() {
+                const state = player.getState();
+                if (state === 'playing') {
+                    player.pause();
+                    playButton.textContent = 'Play';
+                } else {
+                    player.play();
+                    playButton.textContent = 'Pause';
+                }
+            });
+            
+            // Update play button text when player state changes
+            player.on('play', function() {
+                playButton.textContent = 'Pause';
+            });
+            
+            player.on('pause', function() {
+                playButton.textContent = 'Play';
+            });
+            
+            // Volume control
+            volumeSlider.addEventListener('input', function() {
+                const volume = this.value / 100;
+                player.setVolume(volume);
+                volumeValue.textContent = this.value + '%';
+            });
+            
+            // Join channel button
+            joinButton.addEventListener('click', function() {
+                overlay.style.display = 'block';
+                joinDialog.style.display = 'block';
+            });
+            
+            // Close dialog when clicking outside
+            overlay.addEventListener('click', closeDialog);
+            
+            // Form submission
+            dialogForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('nameInput').value;
+                const email = document.getElementById('emailInput').value;
+                
+                // Here you would typically send this data to your server
+                console.log('Joining channel with:', { name, email });
+                
+                // Show success message
+                alert('Thank you for joining our channel!');
+                
+                // Close the dialog
+                closeDialog();
+                
+                // Clear form
+                this.reset();
+            });
+        }
         
-        // State
-        let currentTab = 'matches';
-        let matchPage = 1;
-        let playerPage = 1;
-        let matchesPerPage = 6;
-        let playersPerPage = 6;
-        let currentMatchFilter = 'all';
-        let currentMatchId = null;
-        let currentPlayerId = null;
-        let currentInnings = 1;
-        let currentRankingFormat = 'test';
-        let currentRankingType = 'batting';
-        let matches = [];
-        let players = [];
-        let rankings = {};
+        // Function to close the join dialog
+        function closeDialog() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('joinDialog').style.display = 'none';
+        }
         
-        // Mock Data (for demo purposes, replace with actual API calls)
-        const mockMatches = [
-            {
-                id: 'match1',
-                name: 'Australia vs England',
-                matchType: 'Test',
-                status: 'Live',
-                venue: 'Melbourne Cricket Ground',
-                date: '2025-03-28',
-                teams: ['Australia', 'England'],
-                score: ['245/6', '189/4'],
-                result: null
-            },
-            {
-                id: 'match2',
-                name: 'India vs South Africa',
-                matchType: 'ODI',
-                status: 'Completed',
-                venue: 'Eden Gardens',
-                date: '2025-03-25',
-                teams: ['India', 'South Africa'],
-                score: ['302/5', '245/9'],
-                result: 'India won by 57 runs'
-            },
-            {
-                id: 'match3',
-                name: 'New Zealand vs West Indies',
-                matchType: 'T20',
-                status: 'Upcoming',
-                venue: 'Eden Park',
-                date: '2025-04-02',
-                teams: ['New Zealand', 'West Indies'],
-                score: null,
-                result: null
-            },
-            {
-                id: 'match4',
-                name: 'Pakistan vs Sri Lanka',
-                matchType: 'Test',
-                status: 'Completed',
-                venue: 'National Stadium',
-                date: '2025-03-20',
-                teams: ['Pakistan', 'Sri Lanka'],
-                score: ['389/7d', '256/10', '157/8d', '192/10'],
-                result: 'Pakistan won by 98 runs'
-            },
-            {
-                id: 'match5',
-                name: 'Bangladesh vs Afghanistan',
-                matchType: 'ODI',
-                status: 'Live',
-                venue: 'Shere Bangla Stadium',
-                date: '2025-03-30',
-                teams: ['Bangladesh', 'Afghanistan'],
-                score: ['278/8', '156/3'],
-                result: null
-            },
-            {
-                id: 'match6',
-                name: 'Zimbabwe vs Ireland',
-                matchType: 'T20',
-                status: 'Upcoming',
-                venue: 'Harare Sports Club',
-                date: '2025-04-05',
-                teams: ['Zimbabwe',
+        // SECURITY MEASURES
+        
+        // Disable right-click
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        });
+        
+        // Disable specific keyboard shortcuts like F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        document.addEventListener('keydown', function(e) {
+            // F12 or Ctrl+Shift+I or Ctrl+Shift+J or Ctrl+U
+            if (e.key === 'F12' || 
+              (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) || 
+              (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                showSecurityWarning();
+            }
+        });
+        
+        // Prevent the use of Ctrl+Shift+C (Element inspector)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                showSecurityWarning();
+            }
+        });
+        
+        // Detect devtools based on window size manipulation
+        var devtoolsOpen = false;
+        setInterval(function() {
+            if (window.outerWidth - window.innerWidth > 100 || window.outerHeight - window.innerHeight > 100) {
+                if (!devtoolsOpen) {
+                    devtoolsOpen = true;
+                    console.log("Developer Tools are open.");
+                    showSecurityWarning();
+                }
+            } else {
+                devtoolsOpen = false;
+                hideSecurityWarning();
+            }
+        }, 1000);
+        
+        // Additional detection method using console debugging
+        (function() {
+            let devtools = {
+                isOpen: false,
+                orientation: undefined
+            };
+            
+            const threshold = 160;
+            
+            const emitEvent = (isOpen, orientation) => {
+                devtools.isOpen = isOpen;
+                devtools.orientation = orientation;
+                if (isOpen) {
+                    showSecurityWarning();
+                }
+            };
+            
+            setInterval(() => {
+                const widthThreshold = window.innerWidth - window.outerWidth > threshold;
+                const heightThreshold = window.innerHeight - window.outerHeight > threshold;
+                const orientation = widthThreshold ? 'vertical' : 'horizontal';
+                
+                if (
+                    !(heightThreshold && widthThreshold) &&
+                    ((window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized) || widthThreshold || heightThreshold)
+                ) {
+                    if (!devtools.isOpen || devtools.orientation !== orientation) {
+                        emitEvent(true, orientation);
+                    }
+                } else {
+                    if (devtools.isOpen) {
+                        emitEvent(false, null);
+                    }
+                }
+            }, 500);
+            
+            // Check if debugger is connected
+            if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+                showSecurityWarning();
+            }
+        })();
+        
+        // Show security warning
+        function showSecurityWarning() {
+            const warning = document.getElementById('securityWarning');
+            warning.style.display = 'flex';
+            if (player && player.getState) {
+                player.pause();
+            }
+        }
+        
+        // Hide security warning
+        function hideSecurityWarning() {
+            const warning = document.getElementById('securityWarning');
+            warning.style.display = 'none';
+        }
+        
+        // Another layer of protection - clear the page if console is open
+        (() => {
+            let checkCount = 0;
+            const checkConsole = () => {
+                const startTime = new Date().getTime();
+                debugger;
+                const endTime = new Date().getTime();
+                const diff = endTime - startTime;
+                
+                if (diff > 100) {
+                    showSecurityWarning();
+                }
+                
+                if (checkCount++ < 1000) {
+                    setTimeout(checkConsole, 1000);
+                }
+            };
+            
+            setTimeout(checkConsole, 1000);
+        })();
+    </script>
+</body>
+</html>
