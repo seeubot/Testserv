@@ -1,11 +1,11 @@
 [
   {
-    "title": "Sample News",
-    "url": "https://example.com/streams/news.m3u8"
+    "title": "STAR SPORTS 2",
+    "url": "https://v18tataplaysyndication.akamaized.net/bpk-tv/Sports18_1_HD_voot_MOB/output03/hdntl=exp=1743413871~acl=%2F*~data=hdntl~hmac=6f637fdaa28793950fcb4c9c961d0ba89605c7db3ee186e3d45d1045c7048fed/Sports18_1_HD_voot_MOB-audio_108038_eng=108000-video=3728000.m3u8"
   },
   {
-    "title": "Sports Channel HD",
-    "url": "https://cdn.example.org/live/sports_hd.m3u8"
+    "title": "JIO HOTSTAR HINDI HD",
+    "url": "https://m3u8.cloudycx.net/media/hls/files/720p.m3u8"
   },
   {
     "title": "Movie Network",
