@@ -26,6 +26,7 @@
             color: var(--text-color);
             min-height: 100vh;
             padding: 20px;
+            user-select: none;
         }
         
         .container {
@@ -230,6 +231,12 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            filter: blur(5px);
+            transition: filter 0.3s;
+        }
+        
+        .stream-item:hover .stream-url {
+            filter: blur(5px);
         }
         
         .remove-btn {
@@ -272,26 +279,76 @@
             background-color: var(--accent-color);
         }
         
-        .sample-streams {
-            margin-top: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .settings-panel {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
         }
         
-        .sample-stream-btn {
+        .settings-content {
+            background-color: var(--card-color);
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .settings-group {
+            margin-bottom: 20px;
+        }
+        
+        .settings-group h3 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+        }
+        
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .size-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .size-option {
+            padding: 8px 15px;
             background-color: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 4px;
-            padding: 8px 12px;
-            color: var(--text-color);
             cursor: pointer;
-            text-align: left;
             transition: background-color 0.2s;
         }
         
-        .sample-stream-btn:hover {
-            background-color: rgba(0, 0, 0, 0.5);
+        .size-option.active {
+            background-color: var(--secondary-color);
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
         }
 
         /* Media queries for responsiveness */
@@ -307,7 +364,7 @@
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body oncontextmenu="return false">
     <div class="container">
         <header>
             <div class="logo">
@@ -359,19 +416,6 @@
                     <div class="stream-items" id="stream-list-container">
                         <!-- Stream items will be added here dynamically -->
                     </div>
-                    
-                    <h2 style="margin-top: 20px;">Sample Streams</h2>
-                    <div class="sample-streams">
-                        <button class="sample-stream-btn" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" data-name="Big Buck Bunny (HLS)">
-                            Big Buck Bunny (HLS)
-                        </button>
-                        <button class="sample-stream-btn" data-url="https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8" data-name="Akamai Test Stream">
-                            Akamai Test Stream (HLS)
-                        </button>
-                        <button class="sample-stream-btn" data-url="https://d2zihajmogu5jn.cloudfront.net/sintel/master.m3u8" data-name="Sintel Movie">
-                            Sintel Movie (HLS)
-                        </button>
-                    </div>
                 </div>
             </div>
             
@@ -387,9 +431,58 @@
         </main>
     </div>
     
+    <!-- Settings Panel -->
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2>Settings</h2>
+                <button class="close-btn" id="close-settings-btn">×</button>
+            </div>
+            
+            <div class="settings-group">
+                <h3>Player Size</h3>
+                <div class="size-options">
+                    <div class="size-option" data-size="default">Default</div>
+                    <div class="size-option" data-size="720p">720p</div>
+                    <div class="size-option" data-size="1080p">1080p</div>
+                    <div class="size-option" data-size="1440p">1440p</div>
+                    <div class="size-option" data-size="4k">4K</div>
+                    <div class="size-option" data-size="custom">Custom</div>
+                </div>
+            </div>
+            
+            <div class="settings-group" id="custom-size-controls" style="display: none;">
+                <h3>Custom Size</h3>
+                <div class="setting-item">
+                    <label>Width (px)</label>
+                    <input type="number" class="input-field" id="custom-width" min="320" max="3840" value="1280">
+                </div>
+                <div class="setting-item">
+                    <label>Height (px)</label>
+                    <input type="number" class="input-field" id="custom-height" min="240" max="2160" value="720">
+                </div>
+                <button class="add-btn" id="apply-custom-size-btn">Apply</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.5/hls.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Block developer tools
+            document.addEventListener('keydown', function(e) {
+                // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+                if (
+                    e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) ||
+                    (e.ctrlKey && (e.key === 'U' || e.key === 'u'))
+                ) {
+                    e.preventDefault();
+                    alert('Developer tools are disabled in this application.');
+                    return false;
+                }
+            });
+            
             // Elements
             const player = document.getElementById('player');
             const playBtn = document.getElementById('play-btn');
@@ -403,13 +496,50 @@
             const statusIndicator = document.getElementById('status-indicator');
             const statusText = document.getElementById('status-text');
             const currentStreamInfo = document.getElementById('current-stream-info');
-            const sampleStreamBtns = document.querySelectorAll('.sample-stream-btn');
+            const settingsBtn = document.getElementById('settings-btn');
+            const settingsPanel = document.getElementById('settings-panel');
+            const closeSettingsBtn = document.getElementById('close-settings-btn');
+            const sizeOptions = document.querySelectorAll('.size-option');
+            const customSizeControls = document.getElementById('custom-size-controls');
+            const customWidthInput = document.getElementById('custom-width');
+            const customHeightInput = document.getElementById('custom-height');
+            const applyCustomSizeBtn = document.getElementById('apply-custom-size-btn');
             
             // State
             let currentStream = null;
             let hls = null;
             let isPlaying = false;
             let streams = JSON.parse(localStorage.getItem('streams') || '[]');
+            
+            // Fetch channels from GitHub
+            async function fetchChannels() {
+                try {
+                    updateStatusDisplay('loading', 'Loading Channels...', 'Please wait...');
+                    
+                    const response = await fetch('https://raw.githubusercontent.com/user/repo/main/channels.json');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch channels');
+                    }
+                    
+                    const channels = await response.json();
+                    
+                    // Merge with existing streams, avoiding duplicates
+                    if (Array.isArray(channels)) {
+                        channels.forEach(channel => {
+                            if (!streams.some(stream => stream.url === channel.url)) {
+                                streams.push(channel);
+                            }
+                        });
+                        
+                        saveStreams();
+                        initStreamList();
+                        updateStatusDisplay('connected', 'Channels Loaded', `Loaded ${channels.length} channels`);
+                    }
+                } catch (error) {
+                    console.error('Error fetching channels:', error);
+                    updateStatusDisplay('error', 'Error', 'Failed to load channels');
+                }
+            }
             
             // Initialize the stream list
             function initStreamList() {
@@ -617,6 +747,73 @@
                 }
             }
             
+            // Player size settings
+            function updatePlayerSize(size) {
+                const container = document.querySelector('.video-container');
+                const playerSection = document.querySelector('.player-section');
+                
+                // Reset to default first
+                container.style.width = '';
+                container.style.height = '';
+                playerSection.style.gridTemplateColumns = '3fr 1fr';
+                
+                switch(size) {
+                    case 'default':
+                        // Already reset above
+                        break;
+                    case '720p':
+                        container.style.width = '1280px';
+                        container.style.height = '720px';
+                        adjustLayout();
+                        break;
+                    case '1080p':
+                        container.style.width = '1920px';
+                        container.style.height = '1080px';
+                        adjustLayout();
+                        break;
+                    case '1440p':
+                        container.style.width = '2560px';
+                        container.style.height = '1440px';
+                        adjustLayout();
+                        break;
+                    case '4k':
+                        container.style.width = '3840px';
+                        container.style.height = '2160px';
+                        adjustLayout();
+                        break;
+                    case 'custom':
+                        // Will be handled by apply custom size button
+                        break;
+                }
+            }
+            
+            function adjustLayout() {
+                const container = document.querySelector('.container');
+                const windowWidth = window.innerWidth;
+                const containerWidth = parseInt(getComputedStyle(container).width);
+                
+                if (containerWidth > windowWidth - 40) {
+                    // Change to single column layout
+                    document.querySelector('.player-section').style.gridTemplateColumns = '1fr';
+                }
+            }
+            
+            // Apply custom size
+            function applyCustomSize() {
+                const width = parseInt(customWidthInput.value);
+                const height = parseInt(customHeightInput.value);
+                
+                if (isNaN(width) || isNaN(height) || width < 320 || height < 240) {
+                    alert('Please enter valid dimensions');
+                    return;
+                }
+                
+                const container = document.querySelector('.video-container');
+                container.style.width = `${width}px`;
+                container.style.height = `${height}px`;
+                adjustLayout();
+            }
+            
             // Event Listeners
             addStreamBtn.addEventListener('click', addStream);
             
@@ -660,31 +857,34 @@
                 player.volume = this.value / 100;
             });
             
-            // Sample stream buttons
-            sampleStreamBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const url = this.dataset.url;
-                    const name = this.dataset.name;
+            // Settings panel
+            settingsBtn.addEventListener('click', function() {
+                settingsPanel.style.display = 'flex';
+            });
+            
+            closeSettingsBtn.addEventListener('click', function() {
+                settingsPanel.style.display = 'none';
+            });
+            
+            sizeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    // Update active state
+                    sizeOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
                     
-                    // Add to stream list if it doesn't exist
-                    if (!streams.some(stream => stream.url === url)) {
-                        streams.push({ name, url });
-                        saveStreams();
-                        initStreamList();
+                    const size = this.dataset.size;
+                    
+                    // Show/hide custom controls
+                    if (size === 'custom') {
+                        customSizeControls.style.display = 'block';
+                    } else {
+                        customSizeControls.style.display = 'none';
+                        updatePlayerSize(size);
                     }
-                    
-                    loadStream(url, name);
-                    
-                    // Mark as active
-                    document.querySelectorAll('.stream-item').forEach(item => {
-                        if (item.querySelector('.stream-url').textContent === url) {
-                            item.classList.add('active');
-                        } else {
-                            item.classList.remove('active');
-                        }
-                    });
                 });
             });
+            
+            applyCustomSizeBtn.addEventListener('click', applyCustomSize);
             
             // Player events
             player.addEventListener('play', function() {
@@ -709,10 +909,4 @@
                 updateStatusDisplay('error', 'Error', `Error playing stream: ${player.error ? player.error.message : 'Unknown error'}`);
             });
             
-            // Initialize
-            initStreamList();
-            player.volume = volumeSlider.value / 100;
-        });
-    </script>
-</body>
-</html>
+            // Window resize
