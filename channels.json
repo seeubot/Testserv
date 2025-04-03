@@ -6,7 +6,7 @@
       "description": "Channel description",
       "thumbnail": "thumbnail.jpg",
       "sources": [
-        { "quality": "1080p", "url": "video-1080p.mp4" },
+        { "quality": "1080p", "url": "https://s1.yuvraj.fun/sky-sp-cric/index.m3u8" },
         { "quality": "720p", "url": "video-720p.mp4" }
       ]
     }
