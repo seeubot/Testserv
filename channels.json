@@ -1,42 +1,14 @@
-[
-  {
-    "title": "STAR SPORTS 2",
-    "url": "https://v18tataplaysyndication.akamaized.net/bpk-tv/Sports18_1_HD_voot_MOB/output03/hdntl=exp=1743413871~acl=%2F*~data=hdntl~hmac=6f637fdaa28793950fcb4c9c961d0ba89605c7db3ee186e3d45d1045c7048fed/Sports18_1_HD_voot_MOB-audio_108038_eng=108000-video=3728000.m3u8"
-  },
-  {
-    "title": "JIO HOTSTAR HINDI HD",
-    "url": "https://m3u8.cloudycx.net/media/hls/files/720p.m3u8"
-  },
-  {
-    "title": "Moviork",
-    "url": "https://vkvsd164.okcdn.ru:443/hls/8200407026218.m3u8/sig/QU57NfU4LSM/expires/1743513177960/srcIp/103.145.50.159/urls/45.136.22.63/clientType/14/srcAg/CHROME_ANDROID/mid/9694354352938/8200407026218_medium/index.m3u8"
-  },
-  {
-    "title": "Music TV",
-    "url": "https://music.example.com/live/channel1.m3u8?token=sample"
-  },
-  {
-    "title": "Documentary Channel",
-    "url": "https://docs.example.org/hls/main.m3u8"
-  },
-  {
-    "title": "Kids Entertainment",
-    "url": "https://kids.example.net/stream.m3u8"
-  },
-  {
-    "title": "Science & Technology",
-    "url": "https://science.example.com/tech.m3u8?quality=hd"
-  },
-  {
-    "title": "International News",
-    "url": "https://news.example.org/international/live.m3u8"
-  },
-  {
-    "title": "Comedy Central",
-    "url": "https://comedy.example.net/live/stream.m3u8"
-  },
-  {
-    "title": "Nature & Wildlife",
-    "url": "https://nature.example.com/wildlife.m3u8"
-  }
-]
+{
+  "channels": [
+    {
+      "id": 1,
+      "title": "Channel Name",
+      "description": "Channel description",
+      "thumbnail": "thumbnail.jpg",
+      "sources": [
+        { "quality": "1080p", "url": "video-1080p.mp4" },
+        { "quality": "720p", "url": "video-720p.mp4" }
+      ]
+    }
+  ]
+}
