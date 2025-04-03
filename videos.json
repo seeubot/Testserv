@@ -2,90 +2,90 @@
   "videos": [
     {
       "id": 1,
-      "title": "Nature Documentary",
+      "title": "HINDI",
       "description": "Explore the beauty of untouched natural landscapes across the world",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/nature/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/nature/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/nature/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/nature/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/nature.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 1825,
       "categories": ["documentary", "nature", "4k"],
       "featured": true
     },
     {
       "id": 2,
-      "title": "Adventure Travel Highlights",
+      "title": "ENGLISH",
       "description": "Join our explorers as they travel through extreme environments",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/adventure/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/adventure/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/adventure/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/adventure/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/adventure.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 2451,
       "categories": ["adventure", "travel", "documentary"],
       "featured": true
     },
     {
       "id": 3,
-      "title": "Space Exploration Documentary",
+      "title": "TAMIL",
       "description": "A journey through our solar system and beyond",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/space/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/space/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/space/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/space/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/space.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 3614,
       "categories": ["space", "science", "documentary"],
       "featured": false
     },
     {
       "id": 4,
-      "title": "Wildlife Encounters",
+      "title": "TELUGU",
       "description": "Close-up footage of rare wildlife species in their natural habitat",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/wildlife/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/wildlife/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/wildlife/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/wildlife/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/wildlife.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 2189,
       "categories": ["wildlife", "nature", "animals"],
       "featured": true
     },
     {
       "id": 5,
-      "title": "Underwater Wonders",
+      "title": "KANNADA",
       "description": "Dive deep into the oceans to discover marine life and coral reefs",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/underwater/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/underwater/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/underwater/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/underwater/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/underwater.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 1968,
       "categories": ["underwater", "ocean", "marine"],
       "featured": false
     },
     {
       "id": 6,
-      "title": "Extreme Sports Compilation",
+      "title": "IPL",
       "description": "A collection of the most intense extreme sports moments",
       "sources": [
-        { "quality": "1080p", "url": "https://example.com/videos/sports/1080p.m3u8", "bitrate": 5000 },
-        { "quality": "720p", "url": "https://example.com/videos/sports/720p.m3u8", "bitrate": 2500 },
-        { "quality": "480p", "url": "https://example.com/videos/sports/480p.m3u8", "bitrate": 1000 },
-        { "quality": "360p", "url": "https://example.com/videos/sports/360p.m3u8", "bitrate": 600 }
+        { "quality": "1080p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HAR_IDC_MOB/Fallback/index.m3u8", "bitrate": 5000 },
+        { "quality": "720p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HAR_IDC_MOB/Fallback/index.m3u8", "bitrate": 2500 },
+        { "quality": "480p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HAR_IDC_MOB/Fallback/index.m3u8", "bitrate": 1000 },
+        { "quality": "360p", "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HAR_IDC_MOB/Fallback/index.m3u8", "bitrate": 600 }
       ],
-      "thumbnail": "https://example.com/thumbnails/sports.jpg",
+      "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
       "duration": 1532,
       "categories": ["sports", "extreme", "action"],
       "featured": true
@@ -126,7 +126,7 @@
   "featured": [1, 2, 4, 6],
   "telegram": {
     "channelName": "VideoStreamChannel",
-    "channelUrl": "https://t.me/videostreamchannel",
+    "channelUrl": "https://t.me/+qdLjzK5bWoViOWQ1",
     "dialogMessage": "Join our Telegram channel for exclusive content and updates on new video releases!"
   },
   "config": {
