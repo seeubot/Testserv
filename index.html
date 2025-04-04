@@ -262,6 +262,43 @@
             margin-left: auto;
         }
         
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+        
+        .loading-spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #ff6b6b;
+            text-align: center;
+            padding: 1rem;
+            background-color: rgba(255, 0, 0, 0.1);
+            border-radius: 5px;
+            margin: 1rem 0;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .main-container {
                 flex-direction: column;
@@ -296,6 +333,9 @@
             <h3 class="sidebar-title">Channels</h3>
             <ul class="channel-list" id="channel-list">
                 <!-- Channels will be loaded here -->
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                </div>
             </ul>
         </div>
         
@@ -332,7 +372,13 @@
                         </div>
                     </div>
                 </div>
+                
+                <div class="loading" id="video-loading">
+                    <div class="loading-spinner"></div>
+                </div>
             </div>
+            
+            <div class="error-message" id="error-message"></div>
             
             <div class="channel-info">
                 <h2 class="channel-title" id="current-channel-title">Select a channel to start watching</h2>
@@ -342,117 +388,156 @@
     </div>
 
     <script>
-        // Prevent developer tools and inspect element
-        document.addEventListener('contextmenu', event => event.preventDefault());
-        
-        document.addEventListener('keydown', function(event) {
-            // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
-            if (event.keyCode === 123 || 
-                (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) || 
-                (event.ctrlKey && event.keyCode === 85)) {
-                blockStream();
-                event.preventDefault();
-                return false;
-            }
-        });
-        
-        // Set timer to check for developer tools
-        let devToolsOpened = false;
-        let checkInterval;
-        
-        function startDevToolsCheck() {
-            checkInterval = setInterval(() => {
-                const devtools = /./;
-                devtools.toString = function() {
-                    devToolsOpened = true;
-                    blockStream();
-                    return '';
-                };
-                console.log('%c', devtools);
-                console.clear();
+        // Advanced Developer Tools Detection and Blocking
+        (function() {
+            // Store original functions
+            const originalConsole = window.console;
+            
+            // Counter for debugger attempts
+            let debuggerCounter = 0;
+            
+            // Multiple methods to detect developer tools
+            function blockInspect() {
+                // Method 1: Block context menu
+                document.addEventListener('contextmenu', function(e) {
+                    e.preventDefault();
+                    return false;
+                });
                 
-                // Also check window size for dev tools
-                if (window.outerHeight - window.innerHeight > 100 || window.outerWidth - window.innerWidth > 100) {
-                    devToolsOpened = true;
-                    blockStream();
+                // Method 2: Block keyboard shortcuts
+                document.addEventListener('keydown', function(e) {
+                    // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U
+                    if (e.keyCode === 123 || 
+                        (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) || 
+                        (e.ctrlKey && e.keyCode === 85)) {
+                        e.preventDefault();
+                        blockStream("Developer tools shortcut detected");
+                        return false;
+                    }
+                });
+                
+                // Method 3: Block attempts to open console
+                const div = document.createElement('div');
+                let counter = 0;
+                
+                Object.defineProperty(div, 'id', {
+                    get: function() {
+                        counter++;
+                        if (counter > 1) {
+                            blockStream("Console manipulation detected");
+                        }
+                        return null;
+                    }
+                });
+                
+                // Method 4: Size detection
+                setInterval(function() {
+                    const isDevToolsOpen = window.outerHeight - window.innerHeight > 200 || 
+                                         window.outerWidth - window.innerWidth > 200;
+                    if (isDevToolsOpen) {
+                        blockStream("Screen size manipulation detected");
+                    }
+                    
+                    // Check if debugger was hit too many times
+                    if (debuggerCounter > 5) {
+                        blockStream("Debug attempts detected");
+                    }
+                    
+                    // Reset console after check
+                    console.clear();
+                    debuggerCounter = 0;
+                }, 1000);
+                
+                // Method 5: Console.log override
+                const consoleHolder = Object.create(console);
+                window.console = {
+                    ...consoleHolder,
+                    log: function() {
+                        debuggerCounter++;
+                        consoleHolder.log.apply(consoleHolder, arguments);
+                    },
+                    warn: function() {
+                        debuggerCounter++;
+                        consoleHolder.warn.apply(consoleHolder, arguments);
+                    },
+                    error: function() {
+                        debuggerCounter++;
+                        consoleHolder.error.apply(consoleHolder, arguments);
+                    },
+                    info: function() {
+                        debuggerCounter++;
+                        consoleHolder.info.apply(consoleHolder, arguments);
+                    },
+                    debug: function() {
+                        debuggerCounter++;
+                        consoleHolder.debug.apply(consoleHolder, arguments);
+                    },
+                };
+                
+                // Method 6: Debugger trap
+                setInterval(function() {
+                    debugger;
+                }, 100);
+                
+                // Method 7: Performance.now() trick
+                const start = performance.now();
+                debugger;
+                const end = performance.now();
+                if (end - start > 100) {
+                    blockStream("Debugger suspension detected");
                 }
-            }, 1000);
-        }
+            }
+            
+            // Run inspection blocking
+            blockInspect();
+        })();
         
-        function blockStream() {
-            if (!devToolsOpened) {
-                devToolsOpened = true;
-                document.getElementById('video-player').src = '';
-                document.getElementById('telegram-overlay').style.display = 'flex';
-                alert('Developer tools detected! Stream has been blocked.');
+        // Stream blocking function
+        let streamBlocked = false;
+        function blockStream(reason) {
+            if (!streamBlocked) {
+                streamBlocked = true;
+                
+                // Stop video player
+                const video = document.getElementById('video-player');
+                if (video && video.src) {
+                    video.src = '';
+                    video.load();
+                }
+                
+                // If HLS instance exists, destroy it
+                if (window.hls) {
+                    window.hls.destroy();
+                }
+                
+                // Show telegram overlay
+                const telegramOverlay = document.getElementById('telegram-overlay');
+                if (telegramOverlay) {
+                    telegramOverlay.style.display = 'flex';
+                }
+                
+                // Clear checkbox
+                const joinCheckbox = document.getElementById('join-checkbox');
+                if (joinCheckbox) {
+                    joinCheckbox.checked = false;
+                }
+                
+                // Show error message
+                const errorMessage = document.getElementById('error-message');
+                if (errorMessage) {
+                    errorMessage.textContent = `Stream blocked: ${reason || 'Developer tools detected'}`;
+                    errorMessage.style.display = 'block';
+                }
+                
+                // Optionally, log the attempt
+                try {
+                    // You could send this to your server
+                    console.error(`Stream blocked: ${reason}`);
+                } catch (e) {}
             }
         }
         
-        startDevToolsCheck();
-        
-        // Sample JSON data for channels
-        const channelsData = {
-            "channels": [
-                {
-                    "id": 1,
-                    "name": "Sports HD",
-                    "description": "24/7 sports channel featuring live matches, highlights and commentary",
-                    "streamUrl": "https://example.com/sports.m3u8",
-                    "logo": "sports-icon"
-                },
-                {
-                    "id": 2,
-                    "name": "Movie Central",
-                    "description": "Premium movie channel with the latest Hollywood releases",
-                    "streamUrl": "https://example.com/movies.m3u8",
-                    "logo": "movie-icon"
-                },
-                {
-                    "id": 3,
-                    "name": "News Network",
-                    "description": "24/7 news coverage from around the world",
-                    "streamUrl": "https://example.com/news.m3u8",
-                    "logo": "news-icon"
-                },
-                {
-                    "id": 4,
-                    "name": "Kids Zone",
-                    "description": "Child-friendly content for all ages",
-                    "streamUrl": "https://example.com/kids.m3u8",
-                    "logo": "kids-icon"
-                },
-                {
-                    "id": 5,
-                    "name": "Music TV",
-                    "description": "Latest music videos and performances",
-                    "streamUrl": "https://example.com/music.m3u8",
-                    "logo": "music-icon"
-                },
-                {
-                    "id": 6,
-                    "name": "Documentary Channel",
-                    "description": "Informative documentaries on science, history and nature",
-                    "streamUrl": "https://example.com/documentary.m3u8",
-                    "logo": "doc-icon"
-                },
-                {
-                    "id": 7,
-                    "name": "Entertainment Plus",
-                    "description": "Reality shows, talk shows and entertainment news",
-                    "streamUrl": "https://example.com/entertainment.m3u8",
-                    "logo": "entertainment-icon"
-                },
-                {
-                    "id": 8,
-                    "name": "Comedy Central",
-                    "description": "Stand-up specials, sitcoms and comedy movies",
-                    "streamUrl": "https://example.com/comedy.m3u8",
-                    "logo": "comedy-icon"
-                }
-            ]
-        };
-        
-        // Initialize variables
+        // Initialize HLS
         let hls;
         const video = document.getElementById('video-player');
         const channelList = document.getElementById('channel-list');
@@ -461,27 +546,47 @@
         const searchInput = document.getElementById('search-input');
         const telegramOverlay = document.getElementById('telegram-overlay');
         const joinCheckbox = document.getElementById('join-checkbox');
+        const videoLoading = document.getElementById('video-loading');
+        const errorMessage = document.getElementById('error-message');
         
-        // Initialize HLS
+        let channelsData = { channels: [] };
+        
         function initializeHLS(streamUrl) {
+            if (streamBlocked) return;
+            
+            videoLoading.style.display = 'flex';
+            
             if (Hls.isSupported()) {
                 if (hls) {
                     hls.destroy();
                 }
                 
                 hls = new Hls();
+                window.hls = hls; // Store globally for destruction if needed
+                
                 hls.loadSource(streamUrl);
                 hls.attachMedia(video);
+                
                 hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    videoLoading.style.display = 'none';
                     // Do not play until Telegram join is confirmed
                     if (joinCheckbox.checked) {
-                        video.play();
+                        video.play().catch(error => {
+                            console.error("Playback failed:", error);
+                            errorMessage.textContent = "Playback failed: " + error.message;
+                            errorMessage.style.display = 'block';
+                        });
                     }
                 });
                 
                 hls.on(Hls.Events.ERROR, function(event, data) {
                     console.error('HLS error:', data);
+                    
                     if (data.fatal) {
+                        videoLoading.style.display = 'none';
+                        errorMessage.textContent = "Stream loading error: " + (data.details || "Unknown error");
+                        errorMessage.style.display = 'block';
+                        
                         switch(data.type) {
                             case Hls.ErrorTypes.NETWORK_ERROR:
                                 console.error('Network error, try to recover');
@@ -501,24 +606,59 @@
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 // For Safari
                 video.src = streamUrl;
+                videoLoading.style.display = 'none';
+                
                 // Do not play until Telegram join is confirmed
                 if (joinCheckbox.checked) {
-                    video.play();
+                    video.play().catch(error => {
+                        console.error("Playback failed:", error);
+                        errorMessage.textContent = "Playback failed: " + error.message;
+                        errorMessage.style.display = 'block';
+                    });
                 }
             }
         }
         
-        // Load channels
-        function loadChannels(channels) {
+        // Load channels from external JSON file
+        function loadChannelsFromFile() {
+            fetch('videos.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    channelsData = data;
+                    displayChannels(channelsData.channels);
+                })
+                .catch(error => {
+                    console.error('Error loading channels:', error);
+                    channelList.innerHTML = `<div class="error-message">Failed to load channels: ${error.message}</div>`;
+                });
+        }
+        
+        // Display channels in the UI
+        function displayChannels(channels) {
             channelList.innerHTML = '';
+            
+            if (channels.length === 0) {
+                channelList.innerHTML = '<div class="error-message">No channels found</div>';
+                return;
+            }
             
             channels.forEach(channel => {
                 const li = document.createElement('li');
                 li.className = 'channel-item';
                 li.dataset.id = channel.id;
-                li.innerHTML = `<i class="fas fa-${channel.logo || 'tv'}"></i> ${channel.name}`;
+                
+                // Use icon from JSON if available, otherwise use default
+                const iconClass = channel.logo || 'tv';
+                li.innerHTML = `<i class="fas fa-${iconClass}"></i> ${channel.name}`;
                 
                 li.addEventListener('click', () => {
+                    errorMessage.style.display = 'none';
+                    
                     // Reset active state
                     document.querySelectorAll('.channel-item').forEach(item => {
                         item.classList.remove('active');
@@ -552,7 +692,7 @@
                        channel.description.toLowerCase().includes(searchTerm);
             });
             
-            loadChannels(filteredChannels);
+            displayChannels(filteredChannels);
         });
         
         // Join checkbox
@@ -571,11 +711,8 @@
             }
         });
         
-        // Initialize channel list
-        document.addEventListener('DOMContentLoaded', () => {
-            loadChannels(channelsData.channels);
-            
-            // Custom video controls
+        // Initialize video player controls
+        function initializeVideoControls() {
             const playPauseBtn = document.querySelector('.play-pause-btn');
             const volumeBtn = document.querySelector('.volume-btn');
             const volumeSlider = document.querySelector('.volume-slider');
@@ -620,13 +757,17 @@
             
             // Progress
             video.addEventListener('timeupdate', () => {
-                const percentage = (video.currentTime / video.duration) * 100;
-                progressBar.style.width = `${percentage}%`;
+                if (!isNaN(video.duration)) {
+                    const percentage = (video.currentTime / video.duration) * 100;
+                    progressBar.style.width = `${percentage}%`;
+                }
             });
             
             progressContainer.addEventListener('click', (e) => {
-                const progressTime = (e.offsetX / progressContainer.offsetWidth) * video.duration;
-                video.currentTime = progressTime;
+                if (!isNaN(video.duration)) {
+                    const progressTime = (e.offsetX / progressContainer.offsetWidth) * video.duration;
+                    video.currentTime = progressTime;
+                }
             });
             
             // Fullscreen
@@ -635,7 +776,8 @@
                     document.exitFullscreen();
                     fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
                 } else {
-                    video.requestFullscreen();
+                    const videoContainer = document.querySelector('.video-container');
+                    videoContainer.requestFullscreen();
                     fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
                 }
             });
@@ -648,6 +790,55 @@
             video.addEventListener('pause', () => {
                 playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
             });
+            
+            // Hide loading when video can play
+            video.addEventListener('canplay', () => {
+                videoLoading.style.display = 'none';
+            });
+            
+            // Show loading when video is waiting
+            video.addEventListener('waiting', () => {
+                videoLoading.style.display = 'flex';
+            });
+            
+            // Handle errors
+            video.addEventListener('error', () => {
+                videoLoading.style.display = 'none';
+                errorMessage.textContent = "Video playback error: " + (video.error ? video.error.message : "Unknown error");
+                errorMessage.style.display = 'block';
+            });
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChannelsFromFile();
+            initializeVideoControls();
+            
+            // Backup in case JSON file fails to load
+            setTimeout(() => {
+                if (channelsData.channels.length === 0) {
+                    // Fallback to sample data
+                    channelsData = {
+                        "channels": [
+                            {
+                                "id": 1,
+                                "name": "Sports HD",
+                                "description": "24/7 sports channel featuring live matches, highlights and commentary",
+                                "streamUrl": "https://example.com/sports.m3u8",
+                                "logo": "sports-icon"
+                            },
+                            {
+                                "id": 2,
+                                "name": "Movie Central",
+                                "description": "Premium movie channel with the latest Hollywood releases",
+                                "streamUrl": "https://example.com/movies.m3u8",
+                                "logo": "movie-icon"
+                            }
+                        ]
+                    };
+                    displayChannels(channelsData.channels);
+                }
+            }, 5000);
         });
     </script>
 </body>
