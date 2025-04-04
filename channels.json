@@ -6,7 +6,9 @@
       "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
       "description": "Live Cricket Stream",
       "telegramLink": "https://t.me/terao2",
-      "adTag": "terao2"
+      "adTag": "terao2",
+      "minUsers": 800,  // Fewer viewers for less popular channel
+      "maxUsers": 1500
     },
     {
       "name": "HINDI HD",
@@ -15,7 +17,9 @@
       "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
       "description": "Live Cricket Stream",
       "telegramLink": "https://t.me/terao2",
-      "adTag": "terao2"
+      "adTag": "terao2",
+      "minUsers": 800,  // Fewer viewers for less popular channel
+      "maxUsers": 2500 
     },
     {
         "name": "ENGLISH HD",
@@ -24,7 +28,9 @@
         "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
         "description": "Live Cricket Stream",
         "telegramLink": "https://t.me/terao2",
-        "adTag": "terao2"
+        "adTag": "terao2",
+        "minUsers": 800,  // Fewer viewers for less popular channel
+        "maxUsers": 2500
       },
       {
         "name": "TAMIL HD",
@@ -33,7 +39,9 @@
         "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
         "description": "Live Cricket Stream",
         "telegramLink": "https://t.me/terao2",
-        "adTag": "terao2"
+        "adTag": "terao2",
+        "minUsers": 800,  // Fewer viewers for less popular channel
+        "maxUsers": 1500
       },
       {
         "name": "KANNADA HD",
