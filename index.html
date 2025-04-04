@@ -290,10 +290,267 @@
       document.body.appendChild(errorModal);
     }
     
+    // Network security monitoring function
+    function setupNetworkSecurityMonitoring() {
+      // Variables to track network activity
+      let requestTimes = [];
+      let lastRequestTime = Date.now();
+      let suspiciousActivityCount = 0;
+      
+      // Track XMLHttpRequest
+      const originalXHROpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function() {
+        const currentTime = Date.now();
+        requestTimes.push(currentTime - lastRequestTime);
+        lastRequestTime = currentTime;
+        
+        // Keep only recent requests for analysis
+        if (requestTimes.length > 20) {
+          requestTimes.shift();
+        }
+        
+        // Check for suspicious patterns
+        checkForAnomalies();
+        
+        return originalXHROpen.apply(this, arguments);
+      };
+      
+      // Track fetch requests
+      const originalFetch = window.fetch;
+      window.fetch = function() {
+        const currentTime = Date.now();
+        requestTimes.push(currentTime - lastRequestTime);
+        lastRequestTime = currentTime;
+        
+        if (requestTimes.length > 20) {
+          requestTimes.shift();
+        }
+        
+        checkForAnomalies();
+        
+        return originalFetch.apply(this, arguments);
+      };
+      
+      // WebSocket monitoring
+      const originalWebSocket = window.WebSocket;
+      window.WebSocket = function(url, protocols) {
+        const ws = new originalWebSocket(url, protocols);
+        
+        ws.addEventListener('open', function() {
+          checkWebSocketSecurity(url);
+        });
+        
+        ws.addEventListener('message', function(event) {
+          analyzeWebSocketTraffic(event.data);
+        });
+        
+        return ws;
+      };
+      
+      // Function to analyze WebSocket traffic
+      function analyzeWebSocketTraffic(data) {
+        try {
+          // Basic size analysis
+          if (typeof data === 'string' && data.length > 10000) {
+            suspiciousActivityCount++;
+          }
+          
+          // Check for potential binary data dumps
+          if (data instanceof ArrayBuffer && data.byteLength > 5000) {
+            suspiciousActivityCount++;
+          }
+          
+          // Report if suspicious count exceeds threshold
+          if (suspiciousActivityCount > 5) {
+            reportSecurityIssue('Unusual WebSocket traffic detected');
+          }
+        } catch (e) {
+          console.error('Error analyzing WebSocket traffic:', e);
+        }
+      }
+      
+      // Check WebSocket connection security
+      function checkWebSocketSecurity(url) {
+        try {
+          const wsUrl = new URL(url);
+          
+          // Check if WebSocket is secure
+          if (wsUrl.protocol !== 'wss:') {
+            reportSecurityIssue('Insecure WebSocket connection detected');
+          }
+          
+          // Check if connecting to unexpected domains
+          if (!isAllowedDomain(wsUrl.hostname)) {
+            reportSecurityIssue('Connection to unauthorized WebSocket server');
+          }
+        } catch (e) {
+          console.error('Error checking WebSocket security:', e);
+        }
+      }
+      
+      // List of allowed domains for connections
+      function isAllowedDomain(domain) {
+        const allowedDomains = [
+          'content.jwplatform.com',
+          't.me',
+          'cxh.pages.dev',
+          'cdn.jsdelivr.net',
+          'effectiveratecpm.com'
+          // Add other domains that are expected in your application
+        ];
+        
+        return allowedDomains.some(allowed => domain.includes(allowed));
+      }
+      
+      // Check for patterns that might indicate packet capture tools
+      function checkForAnomalies() {
+        // Check for too many requests in short timeframe
+        if (requestTimes.length > 10) {
+          const average = requestTimes.reduce((a, b) => a + b, 0) / requestTimes.length;
+          
+          if (average < 50) { // Too many rapid requests
+            suspiciousActivityCount++;
+          }
+          
+          // Check for extremely consistent timing (might indicate automated tool)
+          const stdDev = calculateStandardDeviation(requestTimes);
+          if (stdDev < 5 && average < 200) {
+            suspiciousActivityCount++;
+          }
+        }
+        
+        // Reset counter periodically to avoid false positives
+        setTimeout(() => {
+          suspiciousActivityCount = Math.max(0, suspiciousActivityCount - 1);
+        }, 10000);
+        
+        // Report if suspicious count exceeds threshold
+        if (suspiciousActivityCount > 3) {
+          reportSecurityIssue('Potential packet capture activity detected');
+        }
+      }
+      
+      // Utility function to calculate standard deviation
+      function calculateStandardDeviation(array) {
+        const mean = array.reduce((a, b) => a + b, 0) / array.length;
+        const variance = array.map(x => Math.pow(x - mean, 2)).reduce((a, b) => a + b, 0) / array.length;
+        return Math.sqrt(variance);
+      }
+      
+      // Function to handle security issues
+      function reportSecurityIssue(message) {
+        console.warn('Security alert:', message);
+        
+        // Show security warning modal
+        const securityModal = document.createElement('div');
+        securityModal.className = 'modal';
+        securityModal.style.display = 'flex';
+        securityModal.style.zIndex = '20000';
+        
+        securityModal.innerHTML = `
+          <div class="modal-content">
+            <h2>Security Alert</h2>
+            <p>Unusual network activity detected. This could indicate unauthorized monitoring of the stream.</p>
+            <p>For your security, the stream will be paused.</p>
+            <button class="close-btn" id="securityCloseBtn">I Understand</button>
+          </div>
+        `;
+        
+        document.body.appendChild(securityModal);
+        
+        // Pause player if active
+        if (playerInstance && typeof playerInstance.pause === 'function') {
+          playerInstance.pause();
+        }
+        
+        // Add event listener to close button
+        document.getElementById('securityCloseBtn').addEventListener('click', function() {
+          securityModal.style.display = 'none';
+          
+          // Reset counter but keep monitoring
+          suspiciousActivityCount = 0;
+        });
+      }
+      
+      // Check for Wireshark and other packet capture tools
+      function detectNetworkTools() {
+        const userAgent = navigator.userAgent.toLowerCase();
+        const knownToolSignatures = [
+          'wireshark',
+          'fiddler',
+          'charles',
+          'burp',
+          'packetcapture',
+          'networkmonitor'
+        ];
+        
+        // Check if any tool signatures are in user agent (rare but possible)
+        if (knownToolSignatures.some(tool => userAgent.includes(tool))) {
+          reportSecurityIssue('Network monitoring tool detected');
+        }
+        
+        // Check performance characteristics that might indicate VM/tools running
+        const startTime = performance.now();
+        let counter = 0;
+        for (let i = 0; i < 1000000; i++) {
+          counter++;
+        }
+        const endTime = performance.now();
+        const executionTime = endTime - startTime;
+        
+        // Unusually slow execution might indicate debugging/monitoring tools
+        if (executionTime > 500) {
+          suspiciousActivityCount++;
+          if (suspiciousActivityCount > 3) {
+            reportSecurityIssue('System performance indicates possible monitoring tools');
+          }
+        }
+      }
+      
+      // Add window focus detection
+      let windowBlurTime = 0;
+      window.addEventListener('blur', () => {
+        windowBlurTime = Date.now();
+      });
+      
+      window.addEventListener('focus', () => {
+        // If window was blurred for suspiciously short time (tab switching to tools)
+        const blurDuration = Date.now() - windowBlurTime;
+        if (blurDuration > 100 && blurDuration < 1000) {
+          suspiciousActivityCount++;
+          if (suspiciousActivityCount > 3) {
+            reportSecurityIssue('Suspicious window switching pattern detected');
+          }
+        }
+      });
+      
+      // Run network tool detection periodically
+      setInterval(detectNetworkTools, 10000);
+      
+      // Run initial check
+      detectNetworkTools();
+      
+      // Return public methods if needed
+      return {
+        reset: function() {
+          suspiciousActivityCount = 0;
+          requestTimes = [];
+        }
+      };
+    }
+    
     // Event listeners
     document.addEventListener('DOMContentLoaded', function() {
       // Load channels
       loadChannels();
+      
+      // Initialize network security monitoring
+      const networkSecurity = setupNetworkSecurityMonitoring();
+      
+      // Add to window object for potential manual reset
+      window.resetNetworkSecurity = function() {
+        networkSecurity.reset();
+      };
       
       // Channel selector change event
       document.getElementById('channelSelect').addEventListener('change', function(e) {
