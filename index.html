@@ -3,9 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Secure HLS Video Player</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.0/hls.min.js"></script>
+    <title>HLS Video Player</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.10/hls.min.js"></script>
+    <script type='text/javascript' src='//pl26257625.effectiveratecpm.com/c4/b1/b1/c4b1b1de90a35437dcd6eb8ed1a0a8ca.js'></script>
     <style>
+        :root {
+            --primary-color: #1e90ff;
+            --secondary-color: #333;
+            --text-color: #f5f5f5;
+            --bg-color: #1c1c1c;
+            --card-bg: #252525;
+            --hover-color: #0066cc;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -14,25 +25,105 @@
         }
         
         body {
-            background-color: #0f0f0f;
-            color: #fff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            height: 100vh;
         }
         
-        .player-container {
+        header {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .search-container {
+            position: relative;
+            width: 300px;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.6rem 1rem;
+            border-radius: 20px;
+            border: none;
+            background-color: #444;
+            color: var(--text-color);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-color);
+        }
+        
+        .main-container {
+            display: flex;
+            flex: 1;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .sidebar-title {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+        
+        .channel-list {
+            list-style: none;
+        }
+        
+        .channel-item {
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            background-color: var(--card-bg);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .channel-item:hover {
+            background-color: var(--primary-color);
+        }
+        
+        .channel-item.active {
+            background-color: var(--primary-color);
+        }
+        
+        .content {
+            flex: 1;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .video-container {
             position: relative;
             width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
             background-color: #000;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
             overflow: hidden;
-            flex-grow: 1;
+            margin-bottom: 1rem;
+            aspect-ratio: 16/9;
         }
         
-        video {
+        #video-player {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -43,67 +134,40 @@
             bottom: 0;
             left: 0;
             right: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-            padding: 20px;
-            opacity: 0;
-            transition: opacity 0.3s;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 10px;
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        .player-container:hover .controls {
+        .video-container:hover .controls {
             opacity: 1;
         }
         
-        .progress-container {
-            position: relative;
-            height: 8px;
-            background-color: rgba(255, 255, 255, 0.2);
+        .control-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
             cursor: pointer;
-            border-radius: 4px;
+            font-size: 1.2rem;
+        }
+        
+        .progress-container {
+            flex: 1;
+            height: 5px;
+            background-color: #555;
+            border-radius: 5px;
+            overflow: hidden;
+            cursor: pointer;
         }
         
         .progress-bar {
             height: 100%;
-            background-color: #ff0000;
+            background-color: var(--primary-color);
             width: 0;
-            border-radius: 4px;
-        }
-        
-        .control-buttons {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .left-controls, .right-controls {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        button {
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.2s;
-        }
-        
-        button:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-        
-        .time-display {
-            font-size: 14px;
-            min-width: 100px;
         }
         
         .volume-container {
@@ -114,887 +178,477 @@
         
         .volume-slider {
             width: 80px;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
-            position: relative;
-            cursor: pointer;
+            height: 5px;
         }
         
-        .volume-level {
-            height: 100%;
-            background-color: white;
-            border-radius: 2px;
-            width: 100%;
+        .channel-info {
+            margin-bottom: 1rem;
         }
         
-        .video-title {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            opacity: 0;
-            transition: opacity 0.3s;
+        .channel-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
         
-        .player-container:hover .video-title {
-            opacity: 1;
-        }
-        
-        .playback-speed {
-            position: relative;
-        }
-        
-        .speed-options {
-            position: absolute;
-            bottom: 50px;
-            right: 0;
-            background-color: rgba(28, 28, 28, 0.9);
-            border-radius: 8px;
-            padding: 10px 0;
-            display: none;
-            flex-direction: column;
-            min-width: 120px;
-        }
-        
-        .speed-option {
-            padding: 8px 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .speed-option:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .speed-option.active {
-            color: #ff0000;
-        }
-        
-        .show {
-            display: flex;
-        }
-        
-        .video-list {
-            background-color: #1a1a1a;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        
-        .list-title {
-            font-size: 20px;
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-        
-        .videos {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 15px;
-        }
-        
-        .video-item {
-            cursor: pointer;
-            border-radius: 8px;
-            overflow: hidden;
-            transition: transform 0.2s;
-        }
-        
-        .video-item:hover {
-            transform: scale(1.03);
-        }
-        
-        .thumbnail {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background-color: #333;
-            position: relative;
-        }
-        
-        .thumbnail img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .duration {
-            position: absolute;
-            bottom: 8px;
-            right: 8px;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        
-        .video-info {
-            padding: 10px;
-        }
-        
-        .video-info h3 {
-            font-size: 16px;
-            margin-bottom: 5px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .video-info p {
-            font-size: 12px;
+        .channel-description {
             color: #aaa;
+            line-height: 1.5;
         }
         
-        .header {
-            background-color: #1a1a1a;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+        .telegram-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
         }
         
-        .logo {
-            font-size: 24px;
+        .telegram-content {
+            text-align: center;
+            max-width: 400px;
+            padding: 2rem;
+        }
+        
+        .telegram-icon {
+            font-size: 3rem;
+            color: #0088cc;
+            margin-bottom: 1rem;
+        }
+        
+        .telegram-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .telegram-description {
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+        
+        .telegram-btn {
+            display: inline-block;
+            background-color: #0088cc;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 30px;
+            text-decoration: none;
             font-weight: bold;
-            color: #ff0000;
+            transition: all 0.3s ease;
         }
         
-        .settings-icon {
-            cursor: pointer;
-            width: 40px;
-            height: 40px;
+        .telegram-btn:hover {
+            background-color: #005580;
+        }
+        
+        .join-confirm {
+            margin-top: 1rem;
             display: flex;
             align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.2s;
+            gap: 0.5rem;
         }
         
-        .settings-icon:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .join-checkbox {
+            width: 18px;
+            height: 18px;
         }
         
-        .fullscreen-button {
-            margin-left: 10px;
+        .fullscreen-btn {
+            margin-left: auto;
         }
         
-        .loading-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #ff0000;
-            animation: spin 1s ease-in-out infinite;
-            display: none;
-        }
-        
-        @keyframes spin {
-            to {
-                transform: translate(-50%, -50%) rotate(360deg);
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
             }
-        }
-        
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 15px 20px;
-            border-radius: 8px;
-            text-align: center;
-            max-width: 80%;
-            display: none;
-        }
-        
-        .quality-selector {
-            position: relative;
-        }
-        
-        .quality-options {
-            position: absolute;
-            bottom: 50px;
-            right: 0;
-            background-color: rgba(28, 28, 28, 0.9);
-            border-radius: 8px;
-            padding: 10px 0;
-            display: none;
-            flex-direction: column;
-            min-width: 120px;
-        }
-        
-        .quality-option {
-            padding: 8px 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .quality-option:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        
-        .quality-option.active {
-            color: #ff0000;
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .content {
+                order: 1;
+            }
+            
+            .search-container {
+                width: 200px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="logo">VideoStream</div>
-        <div class="settings-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
+    <header>
+        <div class="logo">StreamHub</div>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search channels..." id="search-input">
+            <i class="fas fa-search search-icon"></i>
         </div>
-    </div>
+    </header>
     
-    <div class="player-container">
-        <video id="video" playsinline></video>
-        <div class="video-title">Loading video...</div>
-        <div class="loading-spinner"></div>
-        <div class="error-message">Failed to load video. Please try again later.</div>
+    <div class="main-container">
+        <div class="sidebar">
+            <h3 class="sidebar-title">Channels</h3>
+            <ul class="channel-list" id="channel-list">
+                <!-- Channels will be loaded here -->
+            </ul>
+        </div>
         
-        <div class="controls">
-            <div class="progress-container" id="progress-container">
-                <div class="progress-bar" id="progress-bar"></div>
-            </div>
-            
-            <div class="control-buttons">
-                <div class="left-controls">
-                    <button id="play-pause">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                        </svg>
+        <div class="content">
+            <div class="video-container">
+                <video id="video-player" autoplay controls></video>
+                <div class="controls">
+                    <button class="control-btn play-pause-btn">
+                        <i class="fas fa-play"></i>
                     </button>
-                    
+                    <div class="progress-container">
+                        <div class="progress-bar"></div>
+                    </div>
                     <div class="volume-container">
-                        <button id="mute">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                            </svg>
+                        <button class="control-btn volume-btn">
+                            <i class="fas fa-volume-up"></i>
                         </button>
-                        <div class="volume-slider" id="volume-slider">
-                            <div class="volume-level" id="volume-level"></div>
-                        </div>
+                        <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1">
                     </div>
-                    
-                    <div class="time-display">
-                        <span id="current-time">0:00</span> / <span id="duration">0:00</span>
-                    </div>
+                    <button class="control-btn fullscreen-btn">
+                        <i class="fas fa-expand"></i>
+                    </button>
                 </div>
                 
-                <div class="right-controls">
-                    <div class="quality-selector">
-                        <button id="quality-button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
-                            </svg>
-                        </button>
-                        <div class="quality-options" id="quality-options">
-                            <!-- Quality options will be added dynamically -->
+                <div class="telegram-overlay" id="telegram-overlay">
+                    <div class="telegram-content">
+                        <i class="fab fa-telegram telegram-icon"></i>
+                        <h2 class="telegram-title">Join Our Telegram Channel</h2>
+                        <p class="telegram-description">To access our streaming content, you need to join our Telegram channel for updates and support.</p>
+                        <a href="https://t.me/yourchannel" target="_blank" class="telegram-btn">Join Telegram Channel</a>
+                        <div class="join-confirm">
+                            <input type="checkbox" id="join-checkbox" class="join-checkbox">
+                            <label for="join-checkbox">I have joined the Telegram channel</label>
                         </div>
                     </div>
-                    
-                    <div class="playback-speed">
-                        <button id="speed-button">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                        </button>
-                        <div class="speed-options" id="speed-options">
-                            <div class="speed-option" data-speed="0.5">0.5x</div>
-                            <div class="speed-option" data-speed="0.75">0.75x</div>
-                            <div class="speed-option active" data-speed="1">1x</div>
-                            <div class="speed-option" data-speed="1.25">1.25x</div>
-                            <div class="speed-option" data-speed="1.5">1.5x</div>
-                            <div class="speed-option" data-speed="2">2x</div>
-                        </div>
-                    </div>
-                    
-                    <button id="fullscreen-button" class="fullscreen-button">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="video-list">
-        <h2 class="list-title">Available Videos</h2>
-        <div class="videos" id="videos-container">
-            <!-- Videos will be loaded here dynamically -->
+            
+            <div class="channel-info">
+                <h2 class="channel-title" id="current-channel-title">Select a channel to start watching</h2>
+                <p class="channel-description" id="current-channel-description"></p>
+            </div>
         </div>
     </div>
 
     <script>
-    // Anti-devtools detection
-    (function() {
-        const protectStreaming = () => {
-            let devtools = { isOpen: false };
-            
-            // Check for console opening
-            const timeTest = /()(function.*debugger)( )/, 
-                  dateTest = /(?=(function.*var\s+date))/;
-                  
-            const checks = [
-                function() {
-                    let d = new Date();
-                    const start = performance.now();
-                    debugger;
-                    const end = performance.now();
-                    return (end - start) > 100;
-                },
-                function() {
-                    return window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized;
-                },
-                function() {
-                    return typeof window.__REACT_DEVTOOLS_GLOBAL_HOOK__ !== 'undefined';
-                },
-                function() {
-                    let element = document.createElement('div');
-                    Object.defineProperty(element, 'id', {
-                        get: function() {
-                            devtools.isOpen = true;
-                            return 'id';
-                        }
-                    });
-                    console.log(element);
-                    return devtools.isOpen;
-                },
-                function() {
-                    let element = new Image();
-                    element.__defineGetter__('id', function() {
-                        devtools.isOpen = true;
-                    });
-                    console.log(element);
-                    return devtools.isOpen;
-                },
-                function() {
-                    return window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160;
-                }
-            ];
-
-            const stopStreaming = () => {
-                const video = document.getElementById('video');
-                if (video) {
-                    video.pause();
-                    video.src = '';
-                    if (video.hls) {
-                        video.hls.destroy();
-                    }
-                }
-                document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-family:sans-serif;"><h1>Streaming disabled due to developer tools being open</h1></div>';
-            };
-            
-            // Check at intervals
-            setInterval(() => {
-                for (let i = 0; i < checks.length; i++) {
-                    try {
-                        if (checks[i]()) {
-                            stopStreaming();
-                            return;
-                        }
-                    } catch(e) {}
+        // Prevent developer tools and inspect element
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        
+        document.addEventListener('keydown', function(event) {
+            // Block F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (event.keyCode === 123 || 
+                (event.ctrlKey && event.shiftKey && (event.keyCode === 73 || event.keyCode === 74)) || 
+                (event.ctrlKey && event.keyCode === 85)) {
+                blockStream();
+                event.preventDefault();
+                return false;
+            }
+        });
+        
+        // Set timer to check for developer tools
+        let devToolsOpened = false;
+        let checkInterval;
+        
+        function startDevToolsCheck() {
+            checkInterval = setInterval(() => {
+                const devtools = /./;
+                devtools.toString = function() {
+                    devToolsOpened = true;
+                    blockStream();
+                    return '';
+                };
+                console.log('%c', devtools);
+                console.clear();
+                
+                // Also check window size for dev tools
+                if (window.outerHeight - window.innerHeight > 100 || window.outerWidth - window.innerWidth > 100) {
+                    devToolsOpened = true;
+                    blockStream();
                 }
             }, 1000);
-            
-            // Block right-click
-            document.addEventListener('contextmenu', e => e.preventDefault());
-            
-            // Detect key combinations for dev tools
-            document.addEventListener('keydown', e => {
-                // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C
-                if (
-                    e.keyCode === 123 || 
-                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67))
-                ) {
-                    e.preventDefault();
-                    stopStreaming();
+        }
+        
+        function blockStream() {
+            if (!devToolsOpened) {
+                devToolsOpened = true;
+                document.getElementById('video-player').src = '';
+                document.getElementById('telegram-overlay').style.display = 'flex';
+                alert('Developer tools detected! Stream has been blocked.');
+            }
+        }
+        
+        startDevToolsCheck();
+        
+        // Sample JSON data for channels
+        const channelsData = {
+            "channels": [
+                {
+                    "id": 1,
+                    "name": "Sports HD",
+                    "description": "24/7 sports channel featuring live matches, highlights and commentary",
+                    "streamUrl": "https://example.com/sports.m3u8",
+                    "logo": "sports-icon"
+                },
+                {
+                    "id": 2,
+                    "name": "Movie Central",
+                    "description": "Premium movie channel with the latest Hollywood releases",
+                    "streamUrl": "https://example.com/movies.m3u8",
+                    "logo": "movie-icon"
+                },
+                {
+                    "id": 3,
+                    "name": "News Network",
+                    "description": "24/7 news coverage from around the world",
+                    "streamUrl": "https://example.com/news.m3u8",
+                    "logo": "news-icon"
+                },
+                {
+                    "id": 4,
+                    "name": "Kids Zone",
+                    "description": "Child-friendly content for all ages",
+                    "streamUrl": "https://example.com/kids.m3u8",
+                    "logo": "kids-icon"
+                },
+                {
+                    "id": 5,
+                    "name": "Music TV",
+                    "description": "Latest music videos and performances",
+                    "streamUrl": "https://example.com/music.m3u8",
+                    "logo": "music-icon"
+                },
+                {
+                    "id": 6,
+                    "name": "Documentary Channel",
+                    "description": "Informative documentaries on science, history and nature",
+                    "streamUrl": "https://example.com/documentary.m3u8",
+                    "logo": "doc-icon"
+                },
+                {
+                    "id": 7,
+                    "name": "Entertainment Plus",
+                    "description": "Reality shows, talk shows and entertainment news",
+                    "streamUrl": "https://example.com/entertainment.m3u8",
+                    "logo": "entertainment-icon"
+                },
+                {
+                    "id": 8,
+                    "name": "Comedy Central",
+                    "description": "Stand-up specials, sitcoms and comedy movies",
+                    "streamUrl": "https://example.com/comedy.m3u8",
+                    "logo": "comedy-icon"
                 }
-            });
+            ]
         };
-
-        protectStreaming();
-    })();
-
-    // Main video player functionality
-    document.addEventListener('DOMContentLoaded', function() {
-        const videoElement = document.getElementById('video');
-        const videoTitle = document.querySelector('.video-title');
-        const playPauseButton = document.getElementById('play-pause');
-        const muteButton = document.getElementById('mute');
-        const fullscreenButton = document.getElementById('fullscreen-button');
-        const progressContainer = document.getElementById('progress-container');
-        const progressBar = document.getElementById('progress-bar');
-        const currentTimeElement = document.getElementById('current-time');
-        const durationElement = document.getElementById('duration');
-        const speedButton = document.getElementById('speed-button');
-        const speedOptions = document.getElementById('speed-options');
-        const volumeSlider = document.getElementById('volume-slider');
-        const volumeLevel = document.getElementById('volume-level');
-        const qualityButton = document.getElementById('quality-button');
-        const qualityOptions = document.getElementById('quality-options');
-        const videosContainer = document.getElementById('videos-container');
-        const loadingSpinner = document.querySelector('.loading-spinner');
-        const errorMessage = document.querySelector('.error-message');
-
-        let currentVideo = null;
-        let videos = [];
-
-        // Create an instance of Hls.js
-        let hls = null;
-
-        // Fetch videos from JSON file
-        async function fetchVideos() {
-            try {
-                const response = await fetch('videos.json');
-                if (!response.ok) {
-                    throw new Error('Failed to fetch videos');
-                }
-                videos = await response.json();
-                displayVideos();
-                
-                // Load the first video by default
-                if (videos.length > 0) {
-                    loadVideo(videos[0]);
-                }
-            } catch (error) {
-                console.error('Error loading videos:', error);
-                errorMessage.style.display = 'block';
-                errorMessage.textContent = 'Failed to load video list. Please try again later.';
-            }
-        }
-
-        // Display videos in the list
-        function displayVideos() {
-            videosContainer.innerHTML = '';
-            videos.forEach(video => {
-                const videoItem = document.createElement('div');
-                videoItem.className = 'video-item';
-                videoItem.innerHTML = `
-                    <div class="thumbnail">
-                        <img src="${video.thumbnail || '/api/placeholder/320/180'}" alt="${video.title}">
-                        <div class="duration">${formatTime(video.duration || 0)}</div>
-                    </div>
-                    <div class="video-info">
-                        <h3>${video.title}</h3>
-                        <p>${video.description || ''}</p>
-                    </div>
-                `;
-                videoItem.addEventListener('click', () => loadVideo(video));
-                videosContainer.appendChild(videoItem);
-            });
-        }
-
-        // Load a video
-        function loadVideo(video) {
-            currentVideo = video;
-            videoTitle.textContent = video.title;
-            videoElement.poster = video.thumbnail || '';
-            
-            // Destroy previous Hls instance if exists
-            if (hls) {
-                hls.destroy();
-            }
-
-            // Show loading spinner
-            loadingSpinner.style.display = 'block';
-            errorMessage.style.display = 'none';
-
-            // Check if HLS is supported
+        
+        // Initialize variables
+        let hls;
+        const video = document.getElementById('video-player');
+        const channelList = document.getElementById('channel-list');
+        const channelTitle = document.getElementById('current-channel-title');
+        const channelDescription = document.getElementById('current-channel-description');
+        const searchInput = document.getElementById('search-input');
+        const telegramOverlay = document.getElementById('telegram-overlay');
+        const joinCheckbox = document.getElementById('join-checkbox');
+        
+        // Initialize HLS
+        function initializeHLS(streamUrl) {
             if (Hls.isSupported()) {
-                hls = new Hls({
-                    maxBufferLength: 30,
-                    maxMaxBufferLength: 600,
-                    maxBufferSize: 60*1000*1000
-                });
+                if (hls) {
+                    hls.destroy();
+                }
                 
-                hls.loadSource(video.url);
-                hls.attachMedia(videoElement);
-                
-                hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
-                    // Hide loading spinner
-                    loadingSpinner.style.display = 'none';
-                    
-                    // Setup quality levels
-                    updateQualityLevels(hls.levels);
-                    
-                    // Auto play
-                    videoElement.play()
-                    .catch(e => {
-                        console.log('Autoplay prevented. Click play to start video.');
-                    });
+                hls = new Hls();
+                hls.loadSource(streamUrl);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    // Do not play until Telegram join is confirmed
+                    if (joinCheckbox.checked) {
+                        video.play();
+                    }
                 });
                 
                 hls.on(Hls.Events.ERROR, function(event, data) {
+                    console.error('HLS error:', data);
                     if (data.fatal) {
-                        loadingSpinner.style.display = 'none';
-                        errorMessage.style.display = 'block';
-                        console.error('HLS error:', data);
+                        switch(data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                console.error('Network error, try to recover');
+                                hls.startLoad();
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                console.error('Media error, try to recover');
+                                hls.recoverMediaError();
+                                break;
+                            default:
+                                console.error('Unrecoverable error');
+                                hls.destroy();
+                                break;
+                        }
                     }
                 });
-            } 
-            // For browsers that support native HLS
-            else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-                videoElement.src = video.url;
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // For Safari
+                video.src = streamUrl;
+                // Do not play until Telegram join is confirmed
+                if (joinCheckbox.checked) {
+                    video.play();
+                }
+            }
+        }
+        
+        // Load channels
+        function loadChannels(channels) {
+            channelList.innerHTML = '';
+            
+            channels.forEach(channel => {
+                const li = document.createElement('li');
+                li.className = 'channel-item';
+                li.dataset.id = channel.id;
+                li.innerHTML = `<i class="fas fa-${channel.logo || 'tv'}"></i> ${channel.name}`;
                 
-                videoElement.addEventListener('loadedmetadata', function() {
-                    loadingSpinner.style.display = 'none';
-                    videoElement.play()
-                    .catch(e => {
-                        console.log('Autoplay prevented. Click play to start video.');
+                li.addEventListener('click', () => {
+                    // Reset active state
+                    document.querySelectorAll('.channel-item').forEach(item => {
+                        item.classList.remove('active');
                     });
-                });
-                
-                videoElement.addEventListener('error', function() {
-                    loadingSpinner.style.display = 'none';
-                    errorMessage.style.display = 'block';
-                });
-            } else {
-                loadingSpinner.style.display = 'none';
-                errorMessage.style.display = 'block';
-                errorMessage.textContent = 'HLS playback not supported in this browser.';
-            }
-        }
-
-        // Update quality levels in the menu
-        function updateQualityLevels(levels) {
-            if (!levels || !levels.length) return;
-            
-            qualityOptions.innerHTML = '';
-            
-            // Add Auto option
-            const autoOption = document.createElement('div');
-            autoOption.className = 'quality-option active';
-            autoOption.textContent = 'Auto';
-            autoOption.dataset.level = -1;
-            autoOption.addEventListener('click', () => {
-                setQuality(-1);
-                toggleQualityMenu();
-            });
-            qualityOptions.appendChild(autoOption);
-            
-            // Add each quality level
-            levels.forEach((level, index) => {
-                const option = document.createElement('div');
-                option.className = 'quality-option';
-                option.textContent = `${level.height}p`;
-                option.dataset.level = index;
-                option.addEventListener('click', () => {
-                    setQuality(index);
-                    toggleQualityMenu();
-                });
-                qualityOptions.appendChild(option);
-            });
-        }
-
-        // Set video quality
-        function setQuality(levelIndex) {
-            if (!hls) return;
-            
-            hls.currentLevel = parseInt(levelIndex);
-            
-            // Update active class
-            document.querySelectorAll('.quality-option').forEach(option => {
-                if (parseInt(option.dataset.level) === levelIndex) {
-                    option.classList.add('active');
-                } else {
-                    option.classList.remove('active');
-                }
-            });
-        }
-
-        // Toggle quality menu
-        function toggleQualityMenu() {
-            qualityOptions.classList.toggle('show');
-        }
-
-        // Format time to MM:SS
-        function formatTime(seconds) {
-            seconds = Math.floor(seconds);
-            const minutes = Math.floor(seconds / 60);
-            seconds = seconds % 60;
-            return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-        }
-
-        // Play/Pause toggle
-        playPauseButton.addEventListener('click', () => {
-            if (videoElement.paused) {
-                videoElement.play();
-            } else {
-                videoElement.pause();
-            }
-        });
-
-        // Update play/pause button
-        videoElement.addEventListener('play', () => {
-            playPauseButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="6" y="4" width="4" height="16"></rect>
-                    <rect x="14" y="4" width="4" height="16"></rect>
-                </svg>
-            `;
-        });
-
-        videoElement.addEventListener('pause', () => {
-            playPauseButton.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                </svg>
-            `;
-        });
-
-        // Mute toggle
-        muteButton.addEventListener('click', () => {
-            videoElement.muted = !videoElement.muted;
-            updateVolumeUI();
-        });
-
-        // Volume slider
-        volumeSlider.addEventListener('click', (e) => {
-            const rect = volumeSlider.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            videoElement.volume = Math.max(0, Math.min(1, pos));
-            videoElement.muted = false;
-            updateVolumeUI();
-        });
-
-        // Update volume UI
-        function updateVolumeUI() {
-            if (videoElement.muted || videoElement.volume === 0) {
-                muteButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-li<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                        <line x1="23" y1="9" x2="17" y2="15"></line>
-                        <line x1="17" y1="9" x2="23" y2="15"></line>
-                    </svg>
-                `;
-                volumeLevel.style.width = '0%';
-            } else {
-                const volumeIcon = videoElement.volume >= 0.5 ? `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                    </svg>
-                ` : `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                    </svg>
-                `;
-                muteButton.innerHTML = volumeIcon;
-                volumeLevel.style.width = (videoElement.volume * 100) + '%';
-            }
-        }
-
-        // Fullscreen toggle
-        fullscreenButton.addEventListener('click', () => {
-            if (!document.fullscreenElement) {
-                const playerContainer = document.querySelector('.player-container');
-                if (playerContainer.requestFullscreen) {
-                    playerContainer.requestFullscreen();
-                } else if (playerContainer.mozRequestFullScreen) {
-                    playerContainer.mozRequestFullScreen();
-                } else if (playerContainer.webkitRequestFullscreen) {
-                    playerContainer.webkitRequestFullscreen();
-                } else if (playerContainer.msRequestFullscreen) {
-                    playerContainer.msRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            }
-        });
-
-        // Update fullscreen button
-        document.addEventListener('fullscreenchange', updateFullscreenButton);
-        document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
-        document.addEventListener('mozfullscreenchange', updateFullscreenButton);
-        document.addEventListener('MSFullscreenChange', updateFullscreenButton);
-
-        function updateFullscreenButton() {
-            if (document.fullscreenElement) {
-                fullscreenButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 14h6m0 0v6m0-6l-7 7m17-11h-6m0 0V4m0 6l7-7"></path>
-                    </svg>
-                `;
-            } else {
-                fullscreenButton.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                    </svg>
-                `;
-            }
-        }
-
-        // Progress bar updates
-        videoElement.addEventListener('timeupdate', () => {
-            const progress = (videoElement.currentTime / videoElement.duration) * 100;
-            progressBar.style.width = progress + '%';
-            currentTimeElement.textContent = formatTime(videoElement.currentTime);
-        });
-
-        // Duration updates
-        videoElement.addEventListener('loadedmetadata', () => {
-            durationElement.textContent = formatTime(videoElement.duration);
-        });
-
-        // Click on progress bar
-        progressContainer.addEventListener('click', (e) => {
-            const rect = progressContainer.getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            videoElement.currentTime = pos * videoElement.duration;
-        });
-
-        // Playback speed
-        speedButton.addEventListener('click', () => {
-            speedOptions.classList.toggle('show');
-        });
-
-        document.querySelectorAll('.speed-option').forEach(option => {
-            option.addEventListener('click', () => {
-                const speed = parseFloat(option.dataset.speed);
-                videoElement.playbackRate = speed;
-                
-                document.querySelectorAll('.speed-option').forEach(opt => {
-                    opt.classList.remove('active');
-                });
-                option.classList.add('active');
-                
-                speedOptions.classList.remove('show');
-            });
-        });
-
-        // Quality selector
-        qualityButton.addEventListener('click', toggleQualityMenu);
-
-        // Close menus when clicking elsewhere
-        document.addEventListener('click', (e) => {
-            if (!speedButton.contains(e.target) && !speedOptions.contains(e.target)) {
-                speedOptions.classList.remove('show');
-            }
-            
-            if (!qualityButton.contains(e.target) && !qualityOptions.contains(e.target)) {
-                qualityOptions.classList.remove('show');
-            }
-        });
-
-        // Hide controls when mouse is inactive
-        let mouseTimer;
-        const playerContainer = document.querySelector('.player-container');
-        
-        playerContainer.addEventListener('mousemove', () => {
-            clearTimeout(mouseTimer);
-            document.querySelector('.controls').style.opacity = '1';
-            document.querySelector('.video-title').style.opacity = '1';
-            
-            mouseTimer = setTimeout(() => {
-                if (!videoElement.paused) {
-                    document.querySelector('.controls').style.opacity = '0';
-                    document.querySelector('.video-title').style.opacity = '0';
-                }
-            }, 3000);
-        });
-        
-        playerContainer.addEventListener('mouseleave', () => {
-            if (!videoElement.paused) {
-                document.querySelector('.controls').style.opacity = '0';
-                document.querySelector('.video-title').style.opacity = '0';
-            }
-        });
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', (e) => {
-            if (document.activeElement.tagName.toLowerCase() === 'input') return;
-            
-            switch(e.key.toLowerCase()) {
-                case ' ':
-                case 'k':
-                    e.preventDefault();
-                    if (videoElement.paused) {
-                        videoElement.play();
+                    
+                    // Set active state
+                    li.classList.add('active');
+                    
+                    // Update channel info
+                    channelTitle.textContent = channel.name;
+                    channelDescription.textContent = channel.description;
+                    
+                    // Load stream if Telegram joined
+                    if (joinCheckbox.checked) {
+                        initializeHLS(channel.streamUrl);
+                        telegramOverlay.style.display = 'none';
                     } else {
-                        videoElement.pause();
+                        telegramOverlay.style.display = 'flex';
                     }
-                    break;
-                case 'f':
-                    e.preventDefault();
-                    fullscreenButton.click();
-                    break;
-                case 'm':
-                    e.preventDefault();
-                    videoElement.muted = !videoElement.muted;
-                    updateVolumeUI();
-                    break;
-                case 'arrowleft':
-                    e.preventDefault();
-                    videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
-                    break;
-                case 'arrowright':
-                    e.preventDefault();
-                    videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
-                    break;
-                case 'arrowup':
-                    e.preventDefault();
-                    videoElement.volume = Math.min(1, videoElement.volume + 0.1);
-                    videoElement.muted = false;
-                    updateVolumeUI();
-                    break;
-                case 'arrowdown':
-                    e.preventDefault();
-                    videoElement.volume = Math.max(0, videoElement.volume - 0.1);
-                    updateVolumeUI();
-                    break;
-                case '0':
-                case '1':
-                case '2':
-                case '3':
-                case '4':
-                case '5':
-                case '6':
-                case '7':
-                case '8':
-                case '9':
-                    const percent = parseInt(e.key) * 10;
-                    videoElement.currentTime = (videoElement.duration * percent) / 100;
-                    break;
+                });
+                
+                channelList.appendChild(li);
+            });
+        }
+        
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredChannels = channelsData.channels.filter(channel => {
+                return channel.name.toLowerCase().includes(searchTerm) || 
+                       channel.description.toLowerCase().includes(searchTerm);
+            });
+            
+            loadChannels(filteredChannels);
+        });
+        
+        // Join checkbox
+        joinCheckbox.addEventListener('change', () => {
+            if (joinCheckbox.checked) {
+                telegramOverlay.style.display = 'none';
+                // If channel is selected, play it
+                const activeChannelItem = document.querySelector('.channel-item.active');
+                if (activeChannelItem) {
+                    const channelId = activeChannelItem.dataset.id;
+                    const channel = channelsData.channels.find(c => c.id == channelId);
+                    if (channel) {
+                        initializeHLS(channel.streamUrl);
+                    }
+                }
             }
         });
-
-        // Initial video loading
-        fetchVideos();
-        updateVolumeUI();
-    });
+        
+        // Initialize channel list
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChannels(channelsData.channels);
+            
+            // Custom video controls
+            const playPauseBtn = document.querySelector('.play-pause-btn');
+            const volumeBtn = document.querySelector('.volume-btn');
+            const volumeSlider = document.querySelector('.volume-slider');
+            const progressContainer = document.querySelector('.progress-container');
+            const progressBar = document.querySelector('.progress-bar');
+            const fullscreenBtn = document.querySelector('.fullscreen-btn');
+            
+            // Play/Pause
+            playPauseBtn.addEventListener('click', () => {
+                if (video.paused) {
+                    video.play();
+                    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                } else {
+                    video.pause();
+                    playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+                }
+            });
+            
+            // Volume
+            volumeBtn.addEventListener('click', () => {
+                if (video.muted) {
+                    video.muted = false;
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    volumeSlider.value = video.volume;
+                } else {
+                    video.muted = true;
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    volumeSlider.value = 0;
+                }
+            });
+            
+            volumeSlider.addEventListener('input', () => {
+                video.volume = volumeSlider.value;
+                if (video.volume === 0) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                } else if (video.volume < 0.5) {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-down"></i>';
+                } else {
+                    volumeBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                }
+            });
+            
+            // Progress
+            video.addEventListener('timeupdate', () => {
+                const percentage = (video.currentTime / video.duration) * 100;
+                progressBar.style.width = `${percentage}%`;
+            });
+            
+            progressContainer.addEventListener('click', (e) => {
+                const progressTime = (e.offsetX / progressContainer.offsetWidth) * video.duration;
+                video.currentTime = progressTime;
+            });
+            
+            // Fullscreen
+            fullscreenBtn.addEventListener('click', () => {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                    fullscreenBtn.innerHTML = '<i class="fas fa-expand"></i>';
+                } else {
+                    video.requestFullscreen();
+                    fullscreenBtn.innerHTML = '<i class="fas fa-compress"></i>';
+                }
+            });
+            
+            // Update control buttons when video state changes
+            video.addEventListener('play', () => {
+                playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            });
+            
+            video.addEventListener('pause', () => {
+                playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+            });
+        });
     </script>
-
-    <!-- Ad script as requested -->
-    <script type='text/javascript' src='//pl26257625.effectiveratecpm.com/c4/b1/b1/c4b1b1de90a35437dcd6eb8ed1a0a8ca.js'></script>
 </body>
 </html>
