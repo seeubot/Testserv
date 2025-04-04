@@ -1,60 +1,74 @@
 {
   "channels": [
     {
-      "id": 1,
-      "name": "D",
-      "description": "24/7 sports channel featuring live matches, highlights and commentary",
-      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
-      "logo": "sports-icon"
+      "id": "channel1",
+      "name": "HINDI",
+      "logo": "newspaper",
+      "description": "24/7 live news coverage from around the world with breaking stories and in-depth analysis.",
+      "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8"
     },
     {
-      "id": 2,
-      "name": "Movie Central",
-      "description": "Premium movie channel with the latest Hollywood releases",
-      "streamUrl": "https://example.com/movies.m3u8",
-      "logo": "movie-icon"
+      "id": "channel2",
+      "name": "Sports Network",
+      "logo": "futbol",
+      "description": "Live sports coverage including football, basketball, tennis, and more from major leagues worldwide.",
+      "url": "https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_fmp4/master.m3u8"
     },
     {
-      "id": 3,
-      "name": "News Network",
-      "description": "24/7 news coverage from around the world",
-      "streamUrl": "https://example.com/news.m3u8",
-      "logo": "news-icon"
+      "id": "channel3",
+      "name": "Movie Classics",
+      "logo": "film",
+      "description": "Classic movies from the golden age of cinema, featuring restored films and timeless masterpieces.",
+      "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
     },
     {
-      "id": 4,
+      "id": "channel4",
+      "name": "Documentary Plus",
+      "logo": "compass",
+      "description": "Educational documentaries covering history, science, nature, and culture from acclaimed filmmakers.",
+      "url": "https://demo.unified-streaming.com/k8s/features/stable/video/tears-of-steel/tears-of-steel.ism/.m3u8"
+    },
+    {
+      "id": "channel5",
       "name": "Kids Zone",
-      "description": "Child-friendly content for all ages",
-      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
-      "logo": "kids-icon"
+      "logo": "child",
+      "description": "Family-friendly content for children of all ages, including cartoons, educational shows, and entertainment.",
+      "url": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"
     },
     {
-      "id": 5,
+      "id": "channel6",
       "name": "Music TV",
-      "description": "Latest music videos and performances",
-      "streamUrl": "https://example.com/music.m3u8",
-      "logo": "music-icon"
+      "logo": "music",
+      "description": "Non-stop music videos, live performances, and artist interviews across all genres.",
+      "url": "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
     },
     {
-      "id": 6,
-      "name": "Documentary Channel",
-      "description": "Informative documentaries on science, history and nature",
-      "streamUrl": "https://example.com/documentary.m3u8",
-      "logo": "doc-icon"
+      "id": "channel7",
+      "name": "Tech Today",
+      "logo": "laptop-code",
+      "description": "Latest technology news, product reviews, and innovations from the world of tech and computing.",
+      "url": "https://moctobpltc-i.akamaihd.net/hls/live/571329/eight/playlist.m3u8"
     },
     {
-      "id": 7,
-      "name": "Entertainment Plus",
-      "description": "Reality shows, talk shows and entertainment news",
-      "streamUrl": "https://example.com/entertainment.m3u8",
-      "logo": "entertainment-icon"
+      "id": "channel8",
+      "name": "Cooking Channel",
+      "logo": "utensils",
+      "description": "Culinary shows featuring top chefs, cooking competitions, and recipes from around the world.",
+      "url": "https://multiplatform-f.akamaihd.net/i/multi/april11/sintel/sintel-hd_,512x288_450_b,640x360_700_b,768x432_1000_b,1024x576_1400_m,.mp4.csmil/master.m3u8"
     },
     {
-      "id": 8,
-      "name": "Comedy Central",
-      "description": "Stand-up specials, sitcoms and comedy movies",
-      "streamUrl": "https://example.com/comedy.m3u8",
-      "logo": "comedy-icon"
+      "id": "channel9",
+      "name": "Travel Explorer",
+      "logo": "plane",
+      "description": "Travel guides, destination reviews, and adventure documentaries from exotic locations worldwide.",
+      "url": "https://cph-p2p-msl.akamaized.net/hls/live/2000341/test/master.m3u8"
+    },
+    {
+      "id": "channel10",
+      "name": "Science & Nature",
+      "logo": "microscope",
+      "description": "Fascinating content about scientific discoveries, natural phenomena, and wildlife from around the planet.",
+      "url": "https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
     }
   ]
 }
