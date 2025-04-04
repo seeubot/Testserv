@@ -1,0 +1,47 @@
+[
+    {
+      "name": "TELUGU HD",
+      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TEL_IDC_MOB/Fallback/index.m3u8",
+      "logo": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+      "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+      "description": "Live Cricket Stream",
+      "telegramLink": "https://t.me/terao2",
+      "adTag": "terao2"
+    },
+    {
+      "name": "HINDI HD",
+      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
+      "logo": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+      "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+      "description": "Live Cricket Stream",
+      "telegramLink": "https://t.me/terao2",
+      "adTag": "terao2"
+    },
+    {
+        "name": "ENGLISH HD",
+        "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_ENG_IDC_MOB/Fallback/index.m3u8",
+        "logo": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "description": "Live Cricket Stream",
+        "telegramLink": "https://t.me/terao2",
+        "adTag": "terao2"
+      },
+      {
+        "name": "TAMIL HD",
+        "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_TAM_IDC_MOB/Fallback/index.m3u8",
+        "logo": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "description": "Live Cricket Stream",
+        "telegramLink": "https://t.me/terao2",
+        "adTag": "terao2"
+      },
+      {
+        "name": "KANNADA HD",
+        "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_KAN_IDC_MOB/Fallback/index.m3u8",
+        "logo": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "image": "https://i.postimg.cc/wBM8mbY3/logostream.jpg",
+        "description": "Live Cricket Stream",
+        "telegramLink": "https://t.me/terao2",
+        "adTag": "terao2"
+      }
+  ]
