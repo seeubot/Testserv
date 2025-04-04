@@ -1,9 +1,60 @@
-[
-  {
-    "title": "Video Title",
-    "description": "Video Description",
-    "url": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
-    "thumbnail": "https://i.postimg.cc/rmD3TWgK/logo.jpg",
-    "duration": 120
-  }
-]
+{
+  "channels": [
+    {
+      "id": 1,
+      "name": "Sports HD",
+      "description": "24/7 sports channel featuring live matches, highlights and commentary",
+      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
+      "logo": "sports-icon"
+    },
+    {
+      "id": 2,
+      "name": "Movie Central",
+      "description": "Premium movie channel with the latest Hollywood releases",
+      "streamUrl": "https://example.com/movies.m3u8",
+      "logo": "movie-icon"
+    },
+    {
+      "id": 3,
+      "name": "News Network",
+      "description": "24/7 news coverage from around the world",
+      "streamUrl": "https://example.com/news.m3u8",
+      "logo": "news-icon"
+    },
+    {
+      "id": 4,
+      "name": "Kids Zone",
+      "description": "Child-friendly content for all ages",
+      "streamUrl": "https://prod-ent-live-gm.jiocinema.com/bpk-tv/JS_M1_IPL25_HIN_IDC_MOB/Fallback/index.m3u8",
+      "logo": "kids-icon"
+    },
+    {
+      "id": 5,
+      "name": "Music TV",
+      "description": "Latest music videos and performances",
+      "streamUrl": "https://example.com/music.m3u8",
+      "logo": "music-icon"
+    },
+    {
+      "id": 6,
+      "name": "Documentary Channel",
+      "description": "Informative documentaries on science, history and nature",
+      "streamUrl": "https://example.com/documentary.m3u8",
+      "logo": "doc-icon"
+    },
+    {
+      "id": 7,
+      "name": "Entertainment Plus",
+      "description": "Reality shows, talk shows and entertainment news",
+      "streamUrl": "https://example.com/entertainment.m3u8",
+      "logo": "entertainment-icon"
+    },
+    {
+      "id": 8,
+      "name": "Comedy Central",
+      "description": "Stand-up specials, sitcoms and comedy movies",
+      "streamUrl": "https://example.com/comedy.m3u8",
+      "logo": "comedy-icon"
+    }
+  ]
+}
