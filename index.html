@@ -364,7 +364,7 @@
       document.body.appendChild(errorModal);
     }
     
-    // 1DM Detection function
+    // 1DM Detection function - improved version without downloading test files
     function detect1DMandDownloadManagers() {
       // Check for common 1DM and download manager signatures
       const userAgent = navigator.userAgent.toLowerCase();
@@ -384,41 +384,30 @@
         return true;
       }
       
-      // Check for specific HTTP headers that might indicate 1DM or similar apps
-      // Note: This is limited in browser context, but we can implement basic detection
-      
-      // Check download behavior with a test download
-      try {
-        const testLink = document.createElement('a');
-        testLink.style.display = 'none';
-        testLink.href = 'data:text/plain;charset=utf-8,test';
-        testLink.download = 'test.txt';
-        
-        // Attempt to detect hijacked downloads
-        let downloadHijacked = false;
-        
-        testLink.onclick = function(e) {
-          // Some download managers hijack click events - we can try to detect this
-          if (e.defaultPrevented) {
-            downloadHijacked = true;
+      // Check for specific browser features commonly used by download managers
+      if (typeof navigator.mimeTypes !== 'undefined' && navigator.mimeTypes.length > 0) {
+        // Some download managers modify mime types or add specific ones
+        for (let i = 0; i < navigator.mimeTypes.length; i++) {
+          const mimeType = navigator.mimeTypes[i].type.toLowerCase();
+          if (mimeType.includes('downloader') || mimeType.includes('download-manager')) {
+            document.getElementById('oneDeckmediaModal').style.display = "flex";
+            if (playerInstance) {
+              playerInstance.pause();
+            }
+            return true;
           }
-          // Remove after attempted click
-          document.body.removeChild(testLink);
-          return true;
-        };
-        
-        document.body.appendChild(testLink);
-        testLink.click();
-        
-        if (downloadHijacked) {
-          document.getElementById('oneDeckmediaModal').style.display = "flex";
-          if (playerInstance) {
-            playerInstance.pause();
-          }
-          return true;
         }
-      } catch (e) {
-        console.error("Error in download manager detection:", e);
+      }
+      
+      // Check if navigator has unusual properties (some download managers add these)
+      if (navigator.hasOwnProperty('downloader') || 
+          navigator.hasOwnProperty('idm') || 
+          navigator.hasOwnProperty('oneDeckmedia')) {
+        document.getElementById('oneDeckmediaModal').style.display = "flex";
+        if (playerInstance) {
+          playerInstance.pause();
+        }
+        return true;
       }
       
       return false;
