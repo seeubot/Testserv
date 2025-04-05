@@ -127,6 +127,8 @@
   </style>
   <!-- Added the requested script -->
   <script type='text/javascript' src='//pl26257625.effectiveratecpm.com/c4/b1/b1/c4b1b1de90a35437dcd6eb8ed1a0a8ca.js'></script>
+  <!-- Added the additional requested script -->
+  <script type='text/javascript' src='//pl26257385.effectiveratecpm.com/c5/00/a0/c500a0861187f8237665508aedd6b06a.js'></script>
 </head>
 <body>
   <div class="loading-overlay" id="loadingOverlay">
@@ -180,6 +182,55 @@
     let viewerCount = 0;
     let viewCountUpdateInterval;
     
+    // Default channels list if channels.json fails to load
+    const defaultChannels = [
+      {
+        name: "Sports Channel 1",
+        description: "Live Sports Stream",
+        streamUrl: "https://example.com/stream1.m3u8",
+        logo: "",
+        image: "",
+        telegramLink: "https://t.me/+qdLjzK5bWoViOWQ1",
+        adTag: ""
+      },
+      {
+        name: "Sports Channel 2",
+        description: "Premium Sports Coverage",
+        streamUrl: "https://example.com/stream2.m3u8",
+        logo: "",
+        image: "",
+        telegramLink: "https://t.me/+qdLjzK5bWoViOWQ1",
+        adTag: ""
+      },
+      {
+        name: "Entertainment Channel",
+        description: "Live Entertainment Stream",
+        streamUrl: "https://example.com/stream3.m3u8",
+        logo: "",
+        image: "",
+        telegramLink: "https://t.me/+qdLjzK5bWoViOWQ1",
+        adTag: ""
+      },
+      {
+        name: "News Channel",
+        description: "24/7 News Coverage",
+        streamUrl: "https://example.com/stream4.m3u8",
+        logo: "",
+        image: "",
+        telegramLink: "https://t.me/+qdLjzK5bWoViOWQ1",
+        adTag: ""
+      },
+      {
+        name: "Movies Channel",
+        description: "Latest Movies Stream",
+        streamUrl: "https://example.com/stream5.m3u8",
+        logo: "",
+        image: "",
+        telegramLink: "https://t.me/+qdLjzK5bWoViOWQ1",
+        adTag: ""
+      }
+    ];
+    
     // Load channels from JSON file
     async function loadChannels() {
       try {
@@ -190,15 +241,7 @@
         channels = await response.json();
         
         // Update channel selector
-        const channelSelect = document.getElementById('channelSelect');
-        channelSelect.innerHTML = '';
-        
-        channels.forEach((channel, index) => {
-          const option = document.createElement('option');
-          option.value = index;
-          option.textContent = channel.name;
-          channelSelect.appendChild(option);
-        });
+        updateChannelSelector(channels);
         
         // Initialize player with first channel
         if (channels.length > 0) {
@@ -208,8 +251,30 @@
         }
       } catch (error) {
         console.error('Error loading channels:', error);
-        showError('Failed to load channels data');
+        console.log('Using default channels list instead');
+        channels = defaultChannels;
+        updateChannelSelector(channels);
+        
+        // Initialize player with first channel from default list
+        if (channels.length > 0) {
+          initializePlayer(0);
+        } else {
+          showError('No channels available');
+        }
       }
+    }
+    
+    // Update channel selector with the provided channels
+    function updateChannelSelector(channelsList) {
+      const channelSelect = document.getElementById('channelSelect');
+      channelSelect.innerHTML = '';
+      
+      channelsList.forEach((channel, index) => {
+        const option = document.createElement('option');
+        option.value = index;
+        option.textContent = channel.name;
+        channelSelect.appendChild(option);
+      });
     }
     
     // Initialize JW Player
