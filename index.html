@@ -93,6 +93,37 @@
       border-radius: 5px;
       color: white;
     }
+    
+    /* Live Views Counter Styles */
+    .live-counter {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 9000;
+      background: rgba(255, 0, 0, 0.7);
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      font-size: 14px;
+    }
+    
+    .live-indicator {
+      width: 10px;
+      height: 10px;
+      background-color: red;
+      border-radius: 50%;
+      margin-right: 8px;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
   </style>
   <!-- Added the requested script -->
   <script type='text/javascript' src='//pl26257625.effectiveratecpm.com/c4/b1/b1/c4b1b1de90a35437dcd6eb8ed1a0a8ca.js'></script>
@@ -119,10 +150,23 @@
     </div>
   </div>
   
+  <div class="modal" id="oneDeckmediaModal">
+    <div class="modal-content">
+      <h2>1DM Detected</h2>
+      <p>For copyright protection, this stream cannot be accessed using 1DM or similar download managers.</p>
+      <button class="close-btn" id="closeOneDeckmedia">Close</button>
+    </div>
+  </div>
+  
   <div class="channel-selector">
     <select id="channelSelect">
       <option value="loading">Loading channels...</option>
     </select>
+  </div>
+  
+  <div class="live-counter" id="liveCounter">
+    <div class="live-indicator"></div>
+    <span id="viewCount">0</span> viewers
   </div>
   
   <div id="player"></div>
@@ -133,6 +177,8 @@
     let playerInstance;
     let channels = [];
     let currentChannel = null;
+    let viewerCount = 0;
+    let viewCountUpdateInterval;
     
     // Load channels from JSON file
     async function loadChannels() {
@@ -262,6 +308,9 @@
         playerInstance.on("adBlock", () => {
           document.getElementById("adBlockModal").style.display = "flex";
         });
+        
+        // Initialize viewers count
+        initializeViewersCount();
       });
       
       // Error handling
@@ -269,6 +318,31 @@
         console.error("Player error:", e);
         showError("Stream error. Please try again later.");
       });
+    }
+    
+    // Initialize and update viewers count
+    function initializeViewersCount() {
+      // Clear any existing interval
+      if (viewCountUpdateInterval) {
+        clearInterval(viewCountUpdateInterval);
+      }
+      
+      // Generate initial viewer count (between 500-2000)
+      viewerCount = Math.floor(Math.random() * 1500) + 500;
+      updateViewerCountDisplay();
+      
+      // Update viewers count periodically
+      viewCountUpdateInterval = setInterval(() => {
+        // Random fluctuation in viewer count (-10 to +20)
+        const change = Math.floor(Math.random() * 31) - 10;
+        viewerCount = Math.max(100, viewerCount + change); // Ensure count doesn't go below 100
+        updateViewerCountDisplay();
+      }, 5000); // Update every 5 seconds
+    }
+    
+    // Update the viewer count display
+    function updateViewerCountDisplay() {
+      document.getElementById('viewCount').textContent = viewerCount.toLocaleString();
     }
     
     // Show error message
@@ -288,6 +362,66 @@
       `;
       
       document.body.appendChild(errorModal);
+    }
+    
+    // 1DM Detection function
+    function detect1DMandDownloadManagers() {
+      // Check for common 1DM and download manager signatures
+      const userAgent = navigator.userAgent.toLowerCase();
+      const downloadManagerSignatures = [
+        '1dm', 'onedm', '1 dm', 'idm', 'internet download manager', 
+        'download manager', 'downloader', 'adm', 'advanced download manager',
+        'download master', 'eagleget', 'fdm', 'free download manager',
+        'getright', 'dap', 'downloadapp'
+      ];
+      
+      // Check if any download manager signatures are in user agent
+      if (downloadManagerSignatures.some(dm => userAgent.includes(dm))) {
+        document.getElementById('oneDeckmediaModal').style.display = "flex";
+        if (playerInstance) {
+          playerInstance.pause();
+        }
+        return true;
+      }
+      
+      // Check for specific HTTP headers that might indicate 1DM or similar apps
+      // Note: This is limited in browser context, but we can implement basic detection
+      
+      // Check download behavior with a test download
+      try {
+        const testLink = document.createElement('a');
+        testLink.style.display = 'none';
+        testLink.href = 'data:text/plain;charset=utf-8,test';
+        testLink.download = 'test.txt';
+        
+        // Attempt to detect hijacked downloads
+        let downloadHijacked = false;
+        
+        testLink.onclick = function(e) {
+          // Some download managers hijack click events - we can try to detect this
+          if (e.defaultPrevented) {
+            downloadHijacked = true;
+          }
+          // Remove after attempted click
+          document.body.removeChild(testLink);
+          return true;
+        };
+        
+        document.body.appendChild(testLink);
+        testLink.click();
+        
+        if (downloadHijacked) {
+          document.getElementById('oneDeckmediaModal').style.display = "flex";
+          if (playerInstance) {
+            playerInstance.pause();
+          }
+          return true;
+        }
+      } catch (e) {
+        console.error("Error in download manager detection:", e);
+      }
+      
+      return false;
     }
     
     // Network security monitoring function
@@ -552,6 +686,9 @@
         networkSecurity.reset();
       };
       
+      // Check for 1DM and download managers
+      detect1DMandDownloadManagers();
+      
       // Channel selector change event
       document.getElementById('channelSelect').addEventListener('change', function(e) {
         const channelIndex = parseInt(e.target.value);
@@ -566,6 +703,11 @@
       // DevTools modal close button
       document.getElementById('close').addEventListener('click', function() {
         document.getElementById('devToolsModal').style.display = 'none';
+      });
+      
+      // 1DM modal close button
+      document.getElementById('closeOneDeckmedia').addEventListener('click', function() {
+        document.getElementById('oneDeckmediaModal').style.display = 'none';
       });
     });
     
@@ -586,6 +728,9 @@
         }
       }
     }
+    
+    // Periodically check for download managers
+    setInterval(detect1DMandDownloadManagers, 10000);
     
     // Check for developer tools periodically
     setInterval(detectDevTools, 1000);
@@ -608,6 +753,58 @@
         return false;
       }
     });
+    
+    // Additional protection against stream downloading
+    function setupDownloadProtection() {
+      // Define URLs that should be protected
+      const protectUrls = ['m3u8', 'mpd', 'mp4', 'ts', 'key', 'manifest'];
+      
+      // Intercept fetch requests
+      const originalFetch = window.fetch;
+      window.fetch = function(url, options) {
+        if (typeof url === 'string' && protectUrls.some(ext => url.includes('.' + ext))) {
+          // Add random query parameter to break caching
+          const separator = url.includes('?') ? '&' : '?';
+          const protectedUrl = url + separator + 'token=' + Math.random().toString(36).substring(2, 15);
+          
+          // Add special headers that 1DM won't handle correctly
+          const newOptions = options || {};
+          newOptions.headers = newOptions.headers || {};
+          newOptions.headers['X-Stream-Protection'] = 'enabled';
+          newOptions.headers['Cache-Control'] = 'no-store, max-age=0';
+          
+          return originalFetch.call(this, protectedUrl, newOptions);
+        }
+        return originalFetch.apply(this, arguments);
+      };
+      
+      // Override XMLHttpRequest to add protections
+      const originalXhrOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function(method, url, async, user, password) {
+        if (typeof url === 'string' && protectUrls.some(ext => url.includes('.' + ext))) {
+          // Add random query parameter to break caching
+          const separator = url.includes('?') ? '&' : '?';
+          const protectedUrl = url + separator + 'token=' + Math.random().toString(36).substring(2, 15);
+          
+          // Override the default withCredentials behavior
+          this.withCredentials = true;
+          
+          // Set request headers that can interfere with download managers
+          this.addEventListener('readystatechange', function() {
+            if (this.readyState === 1) { // OPENED
+              this.setRequestHeader('X-Stream-Protection', 'enabled');
+              this.setRequestHeader('Cache-Control', 'no-store, max-age=0');
+            }
+          });
+          
+          return originalXhrOpen.call(this, method, protectedUrl, async, user, password);
+        }
+        return originalXhrOpen.apply(this, arguments);
+      };
+    }
+    
+    // Initialize download protection
+    setupDownloadProtection();
     
     // Confirmation message for joining Telegram channel
     window.addEventListener('load', function() {
